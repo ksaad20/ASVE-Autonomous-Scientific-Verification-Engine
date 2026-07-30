@@ -1,17 +1,26 @@
 """
-Parser infrastructure for ASVE.
+ASVE parser subsystem.
 
-This package provides the parser subsystem responsible for converting
-scientific artifacts into normalized ASVE models.
+This package provides the public parser API for the Automated Scientific
+Verification Engine.
 
-Concrete parsers should inherit from
-:class:`asve.parsers.base.ArtifactParser`.
+The parser subsystem converts research artifacts into normalized ASVE
+representations through a registry and dispatcher architecture.
 """
 
 from __future__ import annotations
 
 from asve.parsers.base import ArtifactParser
+from asve.parsers.dispatcher import ParserDispatcher
+from asve.parsers.registry import ParserRegistry
+from asve.parsers.registry import registry
+from asve.parsers.builtin import register_builtin_parsers
+
 
 __all__ = [
     "ArtifactParser",
+    "ParserDispatcher",
+    "ParserRegistry",
+    "register_builtin_parsers",
+    "registry",
 ]
