@@ -1,24 +1,26 @@
 """
 ASVE extraction subsystem.
 
-The extraction subsystem transforms parsed artifacts into semantic
-information used to construct the Scientific Dependency Graph.
+The extraction subsystem converts parsed scientific artifacts into
+semantic dependency information used by the Scientific Dependency Graph.
 
-Extractors identify relationships such as:
+Public components include:
 
-- software imports
-- document references
-- dataset usage
-- citation relationships
-- execution dependencies
-
-The output of this subsystem feeds the dependency and graph layers.
+- Extractor interface
+- Extraction manager
+- Built-in extractor registration
 """
 
 from __future__ import annotations
 
 from asve.extraction.base import Extractor
+from asve.extraction.builtin import register_builtin_extractors
+from asve.extraction.manager import ExtractionManager
+from asve.extraction.manager import manager
 
 __all__ = [
     "Extractor",
+    "ExtractionManager",
+    "manager",
+    "register_builtin_extractors",
 ]
