@@ -4,17 +4,16 @@ ASVE command-line entry point.
 This module provides the terminal interface for running scientific
 reproducibility verification workflows.
 """
-import sys
-
-import typer
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+from typing import Annotated
+
+import typer
 
 from asve.api import verify
-
-from typing import Annotated
 
 app = typer.Typer(
     name="asve",
@@ -32,25 +31,17 @@ def verify_project(
         typer.Argument(help="Path to the scientific project."),
     ],
 ) -> None:
-    """
-    Verify a scientific project.
-    """
-    report = verify(
-        project_path,
-    )
+    """Verify a scientific project."""
+    report = verify(project_path)
 
-    typer.echo(
-        report.summary(),
-    )
+    typer.echo(report.summary())
 
     if report.has_errors:
-        sys.exit(1)
+        raise typer.Exit(code=1)
 
 
 def main() -> None:
-    """
-    Run ASVE CLI.
-    """
+    """Run the ASVE CLI."""
     app()
 
 
