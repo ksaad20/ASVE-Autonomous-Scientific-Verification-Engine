@@ -139,7 +139,7 @@ pretty = true
 show_error_codes = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["src/asve/tests"]
 pythonpath = ["src"]
 addopts = [
     "--strict-markers",
