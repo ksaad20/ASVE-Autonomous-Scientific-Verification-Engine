@@ -17,9 +17,7 @@ from asve.core.config_loader import load_config
 def test_environment_config_loads_defaults(
     monkeypatch,
 ) -> None:
-    """
-    Missing environment variables should use defaults.
-    """
+    """Missing environment variables should use defaults."""
     monkeypatch.delenv(
         "ASVE_STRICT_MODE",
         raising=False,
@@ -27,18 +25,13 @@ def test_environment_config_loads_defaults(
 
     config = load_config()
 
-    assert isinstance(
-        config,
-        ASVEConfig,
-    )
+    assert isinstance(config, ASVEConfig)
 
 
 def test_environment_override(
     monkeypatch,
 ) -> None:
-    """
-    Environment variables should override defaults.
-    """
+    """Environment variables should override defaults."""
     monkeypatch.setenv(
         "ASVE_STRICT_MODE",
         "true",
@@ -46,52 +39,38 @@ def test_environment_override(
 
     config = load_config()
 
-    assert (
-        config.strict_mode
-        is True
-    )
+    assert config.strict_mode is True
 
 
 def test_invalid_environment_value(
     monkeypatch,
 ) -> None:
-    """
-    Invalid environment values should fail safely.
-    """
+    """Invalid environment values should fail safely."""
     monkeypatch.setenv(
         "ASVE_STRICT_MODE",
         "invalid",
     )
 
-    with pytest.raises(
-        Exception,
-    ):
+    with pytest.raises(ValueError):
         load_config()
 
 
 def test_environment_isolation(
     monkeypatch,
 ) -> None:
-    """
-    Environment changes should be controlled.
-    """
+    """Environment changes should be controlled."""
     monkeypatch.setenv(
         "ASVE_MODE",
         "test",
     )
 
-    assert (
-        os.environ["ASVE_MODE"]
-        == "test"
-    )
+    assert os.environ["ASVE_MODE"] == "test"
 
 
 def test_loaded_configuration_is_consistent(
     monkeypatch,
 ) -> None:
-    """
-    Same environment should produce same configuration.
-    """
+    """Same environment should produce same configuration."""
     monkeypatch.setenv(
         "ASVE_STRICT_MODE",
         "false",
@@ -100,8 +79,4 @@ def test_loaded_configuration_is_consistent(
     first = load_config()
     second = load_config()
 
-    assert (
-        first.strict_mode
-        ==
-        second.strict_mode
-    )
+    assert first.strict_mode == second.strict_mode
