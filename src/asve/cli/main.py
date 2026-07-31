@@ -6,11 +6,11 @@ reproducibility verification workflows.
 """
 import sys
 
+import typer
+
 from __future__ import annotations
 
 from pathlib import Path
-
-import typer
 
 from asve.api import verify
 
