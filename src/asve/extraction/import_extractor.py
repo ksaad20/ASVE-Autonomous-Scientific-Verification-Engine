@@ -13,39 +13,25 @@ and detect undeclared dependencies.
 from __future__ import annotations
 
 import ast
-from pathlib import Path
 
-from asve.models.artifact import Artifact
-from asve.models.dependency import Dependency
-from asve.models.dependency import DependencyType
 from asve.extraction.base import Extractor
+from asve.models.artifact import Artifact
+from asve.models.dependency import Dependency, DependencyType
 
 
 class ImportExtractor(Extractor):
-    """
-    Extract Python import dependencies.
-    """
+    """Extract Python import dependencies."""
 
     @property
     def name(self) -> str:
-        """
-        Return extractor name.
-        """
+        """Return extractor name."""
         return "python_imports"
 
-    def supports(
-        self,
-        artifact: Artifact,
-    ) -> bool:
-        """
-        Return whether the artifact is a Python file.
-        """
+    def supports(self, artifact: Artifact) -> bool:
+        """Return whether the artifact is a Python file."""
         return artifact.path.suffix.lower() == ".py"
 
-    def extract(
-        self,
-        artifact: Artifact,
-    ) -> tuple[Dependency, ...]:
+    def extract(self, artifact: Artifact) -> tuple[Dependency, ...]:
         """
         Extract imported modules.
 
@@ -59,9 +45,7 @@ class ImportExtractor(Extractor):
         tuple[Dependency, ...]
             Import dependencies.
         """
-        source = artifact.path.read_text(
-            encoding="utf-8",
-        )
+        source = artifact.path.read_text(encoding="utf-8")
 
         tree = ast.parse(
             source,
@@ -75,21 +59,19 @@ class ImportExtractor(Extractor):
                 dependencies.extend(
                     self._from_imports(
                         artifact,
-                        (
-                            alias.name
-                            for alias in node.names
-                        ),
+                        (alias.name for alias in node.names),
                     )
                 )
-
-            elif isinstance(node, ast.ImportFrom):
-                if node.module is not None:
-                    dependencies.extend(
-                        self._from_imports(
-                            artifact,
-                            (node.module,),
-                        )
+            elif (
+                isinstance(node, ast.ImportFrom)
+                and node.module is not None
+            ):
+                dependencies.extend(
+                    self._from_imports(
+                        artifact,
+                        (node.module,),
                     )
+                )
 
         return tuple(dependencies)
 
@@ -98,16 +80,12 @@ class ImportExtractor(Extractor):
         artifact: Artifact,
         modules: tuple[str, ...] | object,
     ) -> list[Dependency]:
-        """
-        Convert imported modules into dependencies.
-        """
+        """Convert imported modules into dependencies."""
         return [
             Dependency(
                 source=str(artifact.identifier),
                 target=module,
-                dependency_type=(
-                    DependencyType.IMPORTS
-                ),
+                dependency_type=DependencyType.IMPORTS,
                 metadata={
                     "language": "python",
                 },
@@ -116,6 +94,4 @@ class ImportExtractor(Extractor):
         ]
 
 
-__all__ = [
-    "ImportExtractor",
-          ]
+__all__ = ["ImportExtractor"]
