@@ -17,6 +17,7 @@
 [![Security](https://img.shields.io/badge/Security-Bandit-red.svg)]()
 [![Documentation](https://img.shields.io/badge/Documentation-Latest-blue.svg)]()
 [![CI](https://github.com/ksaad20/ASVE-Autonomous-Scientific-Verification-Engine/actions/workflows/ci.yml/badge.svg)](https://github.com/ksaad20/ASVE-Autonomous-Scientific-Verification-Engine/actions/workflows/ci.yml)
+[![PyPI Downloads](https://static.pepy.tech/badge/asve)](https://pepy.tech/projects/asve)
 
 ---
 
