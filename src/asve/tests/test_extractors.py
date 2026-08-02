@@ -8,10 +8,10 @@ scientific entities.
 from __future__ import annotations
 
 from pathlib import Path
-
-from asve.extractors.registry import ExtractorRegistry
-from asve.extractors.base import BaseExtractor
 from typing import Any
+
+from asve.extractors.base import BaseExtractor
+from asve.extractors.registry import ExtractorRegistry
 
 
 class DummyExtractor(BaseExtractor):  # type: ignore[misc]
@@ -25,7 +25,7 @@ class DummyExtractor(BaseExtractor):  # type: ignore[misc]
         """
         return True
 
-    def extract(self, source: str) -> dict[str, Any]:
+    def extract(self, source: Any) -> dict[str, Any]:
         """
         Extract data from source.
         """
@@ -38,9 +38,7 @@ def test_extractor_registry_registers() -> None:
     """
     registry = ExtractorRegistry()
 
-    registry.register(
-        DummyExtractor(),
-    )
+    registry.register(DummyExtractor())
 
     assert len(registry) == 1
 
@@ -53,34 +51,23 @@ def test_extractor_selection() -> None:
 
     extractor = DummyExtractor()
 
-    registry.register(
-        extractor,
-    )
+    registry.register(extractor)
 
-    result = registry.get_extractors(
-        object(),
-    )
+    result = registry.get_extractors(object())
 
     assert extractor in result
 
 
-def test_extractor_execution(
-    tmp_path: Path,
-) -> None:
+def test_extractor_execution(tmp_path: Path) -> None:
     """
     Extractor should produce structured output.
     """
     extractor = DummyExtractor()
 
     artifact = {
-        "path": (
-            tmp_path
-            / "paper.py"
-        ),
+        "path": tmp_path / "paper.py",
     }
 
-    result = extractor.extract(
-        artifact,
-    )
+    result = extractor.extract(artifact)
 
     assert result["entity"] == "test"
