@@ -11,13 +11,21 @@ cross-artifact verification.
 
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Final
 from uuid import uuid4
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
+import sys
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        """Backport for Python < 3.11."""
 
 
 class EdgeType(StrEnum):
