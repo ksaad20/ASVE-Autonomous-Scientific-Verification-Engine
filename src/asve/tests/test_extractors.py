@@ -11,34 +11,25 @@ from pathlib import Path
 
 from asve.extractors.registry import ExtractorRegistry
 from asve.extractors.base import BaseExtractor
+from typing import Any
 
 
-class DummyExtractor(BaseExtractor):
+class DummyExtractor(BaseExtractor):  # type: ignore[misc]
     """
-    Minimal extractor implementation for testing.
+    Minimal extractor for testing.
     """
 
-    name = "dummy"
-
-    def supports(
-        self,
-        artifact,
-    ) -> bool:
+    def supports(self, source: str) -> bool:
         """
-        Accept all test artifacts.
+        Check if source is supported.
         """
         return True
 
-    def extract(
-        self,
-        artifact,
-    ) -> dict:
+    def extract(self, source: str) -> dict[str, Any]:
         """
-        Return extracted data.
+        Extract data from source.
         """
-        return {
-            "entity": "test",
-        }
+        return {}
 
 
 def test_extractor_registry_registers() -> None:
