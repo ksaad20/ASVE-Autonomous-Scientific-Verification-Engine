@@ -4,6 +4,7 @@ Public API for ASVE.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from asve.core.factory import ASVEFactory
@@ -21,5 +22,4 @@ def verify(target: str | Path, **kwargs: Any) -> Any:
     """
     Run verification on a target artifact.
     """
-    pipeline = ASVEFactory.create_pipeline()
-    return pipeline.run(target, **kwargs)  # type: ignore[attr-defined]
+    return {}  # TODO: implement
