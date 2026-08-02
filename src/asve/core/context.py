@@ -69,7 +69,9 @@ class AnalysisContext(BaseModel):
         """
         self.findings.append(finding)
 
+AnalysisContext = ASVEContext
 
 __all__ = [
     "AnalysisContext",
+    "ASVEContext"
 ]
