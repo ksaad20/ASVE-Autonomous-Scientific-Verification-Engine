@@ -48,7 +48,12 @@ def serialize_json(
         default=str,
     )
 
+def deserialize_json(data: str) -> object:
+    """Stub for JSON deserialization."""
+    return {}
+
 
 __all__ = [
     "serialize_json",
+    "deserialize_json"
 ]
