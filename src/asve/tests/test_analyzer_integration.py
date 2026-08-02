@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from asve.analysis.analyzer import Analyzer
-from asve.core.context import ASVEContext
+from asve.core.context import AnalysisContext
 from asve.models.artifact import Artifact
 
 
@@ -42,7 +42,7 @@ def test_analyzer_processes_artifact(
         path=file,
     )
 
-    context = ASVEContext()
+    context = AnalysisContext()
 
     analyzer = Analyzer()
 
@@ -74,7 +74,7 @@ def test_analyzer_updates_context(
         path=file,
     )
 
-    context = ASVEContext()
+    context = AnalysisContext()
 
     analyzer = Analyzer()
 
@@ -101,7 +101,7 @@ def test_analyzer_handles_unknown_artifact(
 
     analyzer = Analyzer()
 
-    context = ASVEContext()
+    context = AnalysisContext()
 
     result = analyzer.analyze(
         artifact,
