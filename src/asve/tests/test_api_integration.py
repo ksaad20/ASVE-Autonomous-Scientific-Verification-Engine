@@ -1,15 +1,9 @@
-"""
-Tests for ASVE public API integration.
-
-These tests validate the supported external interface.
-"""
-
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
+import pathlib
 
+from pathlib import Path
 from asve.api import verify
 from asve.core.config import ASVEConfig
 from asve.verification.report import VerificationReport
@@ -79,9 +73,7 @@ def test_verify_invalid_path_fails() -> None:
     """
     Invalid project paths should raise errors.
     """
-    with pytest.raises(
-        Exception,
-    ):
+    with pytest.raises(FileNotFoundError):
         verify(
             Path(
                 "/invalid/asve/project/path",
