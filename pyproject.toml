@@ -94,17 +94,6 @@ where = ["src"]
 [tool.setuptools.package-data]
 "asve" = ["py.typed"]
 
-[tool.mypy]
-python_version = "3.11"  # or whatever you target
-strict = true
-warn_return_any = true
-warn_unused_ignores = true
-
-# If you still get import-untyped for your own package during transition:
-# [[tool.mypy.overrides]]
-# module = "asve.*"
-# ignore_missing_imports = true
-
 [tool.black]
 line-length = 88
 target-version = [
@@ -151,6 +140,15 @@ check_untyped_defs = true
 no_implicit_optional = true
 pretty = true
 show_error_codes = true
+python_version = "3.11"  # or whatever you target
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+
+# If you still get import-untyped for your own package during transition:
+# [[tool.mypy.overrides]]
+# module = "asve.*"
+# ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["src/asve/tests"]
