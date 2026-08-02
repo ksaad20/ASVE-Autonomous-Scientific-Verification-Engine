@@ -127,6 +127,9 @@ known-first-party = ["asve"]
 
 [tool.mypy]
 python_version = "3.10"
+mypy_path = ["src"]
+namespace_packages = true
+explicit_package_bases = true
 strict = true
 warn_unused_configs = true
 warn_return_any = true
