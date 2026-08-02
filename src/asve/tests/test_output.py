@@ -27,23 +27,12 @@ class MockFinding:
 
 
 class MockReport:
-    """
-    Minimal verification report mock.
-    """
+    def __init__(self) -> None:
+        self.severity_counts = {"warning": 1}
+        self.findings = [MockFinding()]
 
     def summary(self) -> str:
-        """
-        Return report summary.
-        """
         return "ASVE verification complete"
-
-    severity_counts = {
-        "warning": 1,
-    }
-
-    findings = [
-        MockFinding(),
-    ]
 
 
 def test_output_contains_summary() -> None:
