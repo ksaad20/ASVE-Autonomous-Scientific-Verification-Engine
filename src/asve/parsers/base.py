@@ -1,4 +1,3 @@
-s Dr"""
 Base parser interfaces for ASVE.
 
 Every parser converts a supported scientific artifact into a normalized
