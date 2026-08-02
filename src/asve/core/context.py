@@ -15,7 +15,7 @@ from pydantic import Field
 
 from asve.graph.graph import ScientificGraph
 from asve.models.artifact import Artifact
-from asve.verification.finding import Finding
+from asve.models.finding import Finding
 
 
 class AnalysisContext(BaseModel):
@@ -69,6 +69,10 @@ class AnalysisContext(BaseModel):
         """
         self.findings.append(finding)
 
+
+ASVEContext = AnalysisContext
+
 __all__ = [
     "AnalysisContext",
+    "ASVEContext",
 ]
