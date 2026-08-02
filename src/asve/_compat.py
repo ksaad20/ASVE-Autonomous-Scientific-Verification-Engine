@@ -1,3 +1,29 @@
-# 1. Save _compat.py to src/asve/_compat.py
-# 2. Replace all direct StrEnum imports across the codebase
-find src/asve -name "*.py" -exec grep -l "from enum import StrEnum" {} \; | xargs sed -i 's/from enum import StrEnum/from asve._compat import StrEnum/'
+"""Compatibility shims for older Python versions.
+
+Centralizes backports so the rest of the codebase can import
+modern APIs without version checks everywhere.
+"""
+
+import sys
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):  # type: ignore[no-redef]
+        """Backport of :class:`enum.StrEnum` for Python < 3.11.
+
+        Members are automatically coerced to strings when used in
+        string contexts.
+
+        """
+
+        def __str__(self) -> str:
+            return self.value
+
+        def __repr__(self) -> str:
+            return self.value
+
+
+__all__ = ["StrEnum"]
