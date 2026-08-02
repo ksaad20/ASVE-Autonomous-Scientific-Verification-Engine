@@ -107,11 +107,10 @@ class ScientificDependencyGraph(BaseModel):
 
 EMPTY_GRAPH = ScientificDependencyGraph()
 
+ScientificGraph = ScientificDependencyGraph
+
 __all__ = [
     "EMPTY_GRAPH",
     "ScientificDependencyGraph",
+    "ScientificGraph"
   ]
-
-# At the bottom of src/asve/graph/graph.py, after the class definition:
-
-ScientificGraph = ScientificDependencyGraph
