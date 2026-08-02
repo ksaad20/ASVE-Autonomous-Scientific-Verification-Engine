@@ -18,20 +18,22 @@ class MockSeverity:
 
 
 class MockFinding:
-    """
-    Mock verification finding.
-    """
+    """Minimal finding mock for testing."""
 
-    severity = MockSeverity()
-    title = "Missing metadata"
+    def __init__(self, severity: str = "warning", message: str = "Mock finding") -> None:
+        self.severity = severity
+        self.message = message
 
 
 class MockReport:
+    """Minimal verification report mock."""
+
     def __init__(self) -> None:
-        self.severity_counts = {"warning": 1}
-        self.findings = [MockFinding()]
+        self.severity_counts: dict[str, int] = {"warning": 1}
+        self.findings: list[MockFinding] = [MockFinding()]
 
     def summary(self) -> str:
+        """Return report summary."""
         return "ASVE verification complete"
 
 
