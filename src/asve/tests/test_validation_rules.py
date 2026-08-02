@@ -10,20 +10,20 @@ from pathlib import Path
 
 from asve.rules.engine import RuleEngine
 from asve.rules.base import Rule
+from typing import Any
 
 
-class ExampleRule(Rule):
+class ExampleRule(Rule):  # type: ignore[misc]
     """
     Minimal validation rule.
     """
 
     name = "example_rule"
-
     severity = "medium"
 
     def evaluate(
         self,
-        artifact,
+        artifact: Any,
     ) -> bool:
         """
         Evaluate artifact.
