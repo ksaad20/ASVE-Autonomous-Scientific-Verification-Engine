@@ -10,6 +10,7 @@ Future versions will support JSON and CI-specific formats.
 from __future__ import annotations
 
 from asve.verification.report import VerificationReport
+from typing import Any
 
 
 def format_report(
@@ -58,6 +59,12 @@ def format_report(
             )
 
     return "\n".join(lines)
+
+def render_report(report: Any) -> str:
+    """
+    Render verification report for CLI display.
+    """
+    return str(report)
 
 
 __all__ = [
