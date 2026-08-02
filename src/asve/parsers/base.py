@@ -1,69 +1,68 @@
-Base parser interfaces for ASVE.
+"""Base parser interface for artifact extraction.
 
-Every parser converts a supported scientific artifact into a normalized
-representation that can be consumed by the remainder of the ASVE
-pipeline.
-
-Concrete parsers should be deterministic, side-effect free, and avoid
-modifying project files.
+This module defines the abstract base class that all artifact parsers must
+implement, ensuring a consistent API across the package.
 """
 
 from __future__ import annotations
 
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from asve.models.artifact import Artifact
+if TYPE_CHECKING:
+    from asve.models.artifact import Artifact
 
 
 class ArtifactParser(ABC):
+    """Abstract base class for artifact parsers.
+
+    Provides a common interface for parsing artifacts from various
+    sources and formats. Concrete implementations must override the
+    :meth:`parse` method.
+
+    Examples
+    --------
+    >>> class MyParser(ArtifactParser):
+    ...     def parse(self, path: Path) -> Artifact:
+    ...         ...
+
     """
-    Abstract base class for all ASVE artifact parsers.
-    """
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """
-        Return the parser name.
-        """
-
-    @property
-    @abstractmethod
-    def supported_extensions(self) -> frozenset[str]:
-        """
-        Return supported filename extensions.
-        """
-
-    def supports(self, path: Path) -> bool:
-        """
-        Return True if this parser supports the supplied file.
-        """
-        return path.suffix.lower() in self.supported_extensions
 
     @abstractmethod
     def parse(self, path: Path) -> Artifact:
-        """
-        Parse a file into an Artifact.
+        """Parse an artifact from the given path.
 
         Parameters
         ----------
-        path
-            Path to the artifact.
+        path : pathlib.Path
+            Path to the artifact file or directory.
 
         Returns
         -------
         Artifact
             Parsed artifact metadata.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the artifact path does not exist.
+        ValueError
+            If the artifact format is not supported or invalid.
+        NotImplementedError
+            If the parser does not support the artifact type.
+
         """
 
     def __repr__(self) -> str:
+        """Return a string representation of the parser."""
         return f"{self.__class__.__name__}()"
 
+
+# Backwards-compatible alias.
 BaseParser = ArtifactParser
 
 __all__ = [
+    "ArtifactParser",
     "BaseParser",
-    "ArtifactParser"
 ]
