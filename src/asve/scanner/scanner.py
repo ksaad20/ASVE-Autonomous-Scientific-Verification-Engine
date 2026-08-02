@@ -68,9 +68,9 @@ class ArtifactScanner:
 
         return tuple(artifacts)
 
-Scanner = FileScanner
+Scanner = ArtifactScanner
 
 __all__ = [
-    "FileScanner",
+    "Scanner",
     "ArtifactScanner"
 ]
