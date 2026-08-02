@@ -8,21 +8,21 @@ from __future__ import annotations
 
 from asve.rules.base import BaseRule
 from asve.rules.registry import RuleRegistry
+from typing import Any
 
 
-class DummyRule(BaseRule):
+class DummyRule(BaseRule):  # type: ignore[misc]
     """
     Minimal verification rule for testing.
     """
 
     name = "dummy_rule"
-
     severity = "warning"
 
     def check(
         self,
-        context,
-    ) -> list:
+        context: dict[str, Any],
+    ) -> list[dict[str, str]]:
         """
         Return a test finding.
         """
