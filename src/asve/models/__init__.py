@@ -3,4 +3,4 @@
 from asve.models.metadata import Metadata
 from asve.models.severity import Severity
 
-__all__ = ["Metadata", "Severity"]
+__all__ = ["Metadata", "Severity", "CacheManager, "Finding"]
