@@ -15,3 +15,11 @@ def create_pipeline(config: dict[str, Any]) -> Any:
     """
     pipeline = ASVEFactory.create_pipeline()
     return pipeline
+
+
+def verify(target: str | Path, **kwargs: Any) -> Any:
+    """
+    Run verification on a target artifact.
+    """
+    pipeline = ASVEFactory.create_pipeline()
+    return pipeline.run(target, **kwargs)  # type: ignore[attr-defined]
