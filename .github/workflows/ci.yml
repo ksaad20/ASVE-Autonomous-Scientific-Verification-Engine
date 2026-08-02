@@ -45,7 +45,7 @@ jobs:
         run: ruff check src
 
       - name: Ruf Fix
-        run: ruff . --fix
+        run: ruff check . --fix
 
       - name: Check formatting
         run: black --check src
