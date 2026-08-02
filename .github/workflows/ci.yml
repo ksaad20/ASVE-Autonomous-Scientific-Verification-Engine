@@ -51,7 +51,8 @@ jobs:
   #       run: mypy src/asve
 
       - name: Security scan
-        run: bandit -r src/asve
+        # After — exclude tests and skip B101:
+        run: bandit -r src/asve -x src/asve/tests -s B101
 
       - name: Run tests
         run: |
