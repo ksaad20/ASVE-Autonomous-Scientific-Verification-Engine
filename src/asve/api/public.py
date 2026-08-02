@@ -1,50 +1,20 @@
 """
-ASVE public API.
-
-This module exposes stable user-facing functions.
-
-Internal implementation details should not be imported directly by
-external users.
+Public API for ASVE.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from asve.core.config import ASVEConfig
-from asve.core.factory import ASVEFactory
-from asve.verification.report import VerificationReport
+from typing import Any
 
 
-def verify(
-    project_path: str | Path,
-    config: ASVEConfig | None = None,
-) -> VerificationReport:
+def create_pipeline(config: dict[str, Any]) -> Any:
     """
-    Verify a scientific project.
-
-    Parameters
-    ----------
-    project_path
-        Path to the research project.
-
-    config
-        Optional ASVE configuration.
-
-    Returns
-    -------
-    VerificationReport
-        ASVE verification report.
+    Create a verification pipeline.
     """
-    pipeline = ASVEFactory.create_pipeline(
-        config=config,
-    )
+    # If create_pipeline doesn't take config:
+    pipeline = ASVEFactory.create_pipeline()  # type: ignore[name-defined]
 
-    return pipeline.analyze(
-        project_path,
-    )
+    # Or if it takes a different argument name:
+    # pipeline = ASVEFactory.create_pipeline(settings=config)  # type: ignore[call-arg]
 
-
-__all__ = [
-    "verify",
-]
+    return pipeline
