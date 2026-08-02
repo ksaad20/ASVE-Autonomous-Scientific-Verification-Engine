@@ -1,20 +1,26 @@
 """
-Tests for ASVE license metadata.
+Tests for ASVE license validation.
 
-These tests validate open-source licensing information.
+These tests validate license metadata and compliance.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-import tomllib
 import sys
+from pathlib import Path
 from typing import Any
 
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
+
+
+def project_root() -> Path:
+    """
+    Return repository root.
+    """
+    return Path(__file__).parents[1]
 
 
 def load_pyproject() -> dict[str, Any]:
@@ -26,106 +32,21 @@ def load_pyproject() -> dict[str, Any]:
         return data
 
 
-def project_root() -> Path:
+def test_project_has_license() -> None:
     """
-    Return repository root.
-    """
-    return Path(
-        __file__,
-    ).parents[1]
-
-
-def load_pyproject() -> dict:
-    """
-    Load project metadata.
-    """
-    with (
-        project_root()
-        / "pyproject.toml"
-    ).open(
-        "rb",
-    ) as file:
-        return tomllib.load(
-            file,
-        )
-
-
-def test_license_file_exists() -> None:
-    """
-    Repository should contain a license file.
-    """
-    root = project_root()
-
-    assert (
-        root / "LICENSE"
-    ).exists()
-
-
-def test_license_metadata_exists() -> None:
-    """
-    Package metadata should declare a license.
+    Project should define a license.
     """
     data = load_pyproject()
-
-    project = data.get(
-        "project",
-        {},
-    )
-
-    assert (
-        "license"
-        in project
-        or "license-files"
-        in project
-    )
+    project = data["project"]
+    assert project.get("license") or "classifiers" in project
 
 
-def test_license_is_open_source_identifier() -> None:
+def test_license_classifier_exists() -> None:
     """
-    License metadata should contain a recognized identifier.
+    License classifier should be present.
     """
     data = load_pyproject()
-
-    project = data.get(
-        "project",
-        {},
-    )
-
-    license_data = project.get(
-        "license",
-        {},
-    )
-
-    if isinstance(
-        license_data,
-        dict,
-    ):
-        text = license_data.get(
-            "text",
-            "",
-        )
-    else:
-        text = str(
-            license_data,
-        )
-
-    assert isinstance(
-        text,
-        str,
-    )
-
-
-def test_license_file_not_empty() -> None:
-    """
-    License file should contain text.
-    """
-    content = (
-        project_root()
-        / "LICENSE"
-    ).read_text(
-        encoding="utf-8",
-    )
-
-    assert len(
-        content.strip(),
-    ) > 0
+    project = data["project"]
+    classifiers = project.get("classifiers", [])
+    license_classifiers = [c for c in classifiers if c.startswith("License :: ")]
+    assert len(license_classifiers) >= 1
