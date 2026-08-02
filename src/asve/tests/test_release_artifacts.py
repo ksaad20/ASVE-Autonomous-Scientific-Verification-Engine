@@ -10,6 +10,8 @@ from pathlib import Path
 
 import sys
 
+from typing import Any
+
 if sys.version_info >= (3, 11):
     import tomllib
 else:
@@ -18,14 +20,14 @@ else:
 
 def project_root() -> Path:
     """
-    Return repository root.
+    Return repository root
     """
     return Path(
         __file__,
     ).parents[1]
+    
 
-
-def load_pyproject() -> dict:
+def load_pyproject() -> dict[str, Any]:
     """
     Load package metadata.
     """
@@ -35,9 +37,8 @@ def load_pyproject() -> dict:
     ).open(
         "rb",
     ) as file:
-        return tomllib.load(
-            file,
-        )
+        data: dict[str, Any] = tomllib.load(file)
+        return data
 
 
 def test_build_configuration_exists() -> None:
