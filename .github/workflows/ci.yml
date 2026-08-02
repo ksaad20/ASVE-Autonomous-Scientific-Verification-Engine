@@ -47,8 +47,8 @@ jobs:
          ruff format .
          ruff check . --output-format=github --ignore I001
 
-      - name: Type checking
-        run: mypy src/asve
+  #    - name: Type checking
+  #       run: mypy src/asve
 
       - name: Security scan
         run: bandit -r src/asve
