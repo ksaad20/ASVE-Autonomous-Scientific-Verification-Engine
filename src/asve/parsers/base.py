@@ -1,4 +1,4 @@
-"""
+s Dr"""
 Base parser interfaces for ASVE.
 
 Every parser converts a supported scientific artifact into a normalized
@@ -62,7 +62,7 @@ class ArtifactParser(ABC):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
 
-BaseParser = Parser
+BaseParser = ArtifactParser
 
 __all__ = [
     "BaseParser",
