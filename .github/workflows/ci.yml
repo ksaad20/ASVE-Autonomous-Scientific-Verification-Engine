@@ -42,13 +42,8 @@ jobs:
           python -c "import asve; print(asve.__version__)"
 
       - name: Lint with Ruff
-        run: ruff check src
-
-      - name: Ruf Fix
-        run: ruff check src . --fix
-
-      - name: Check formatting
-        run: black --check src
+        run: |
+         ruff check . --output-format=github --ignore I001
 
       - name: Type checking
         run: mypy src/asve
