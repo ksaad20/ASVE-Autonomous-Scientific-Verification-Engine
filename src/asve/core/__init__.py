@@ -12,4 +12,5 @@ from asve.core.pipeline import ASVEPipeline
 
 __all__ = [
     "ASVEPipeline",
+    "AnalysisContext"
 ]
