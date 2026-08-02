@@ -6,66 +6,39 @@ These tests validate release metadata before publishing.
 
 from __future__ import annotations
 
+import subprocess
+import sys
 import zipfile
 from pathlib import Path
 from typing import Any
-
-import sys
 
 if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
 
-def load_project_metadata() -> dict[str, Any]:
-    """
-    Load project metadata from pyproject.toml.
-    """
-    with (
-        project_root()
-        / "pyproject.toml"
-    ).open(
-        "rb",
-    ) as file:
-        data: dict[str, Any] = tomllib.load(file)
-        return data
-
 
 def project_root() -> Path:
     """
     Return repository root.
     """
-    return Path(
-        __file__,
-    ).parents[1]
+    return Path(__file__).parents[1]
 
 
-def load_project_metadata() -> dict:
+def load_project_metadata() -> dict[str, Any]:
     """
-    Load pyproject metadata.
+    Load project metadata from pyproject.toml.
     """
-    with (
-        project_root()
-        / "pyproject.toml"
-    ).open(
-        "rb",
-    ) as file:
-        return tomllib.load(
-            file,
-        )
+    with (project_root() / "pyproject.toml").open("rb") as file:
+        data: dict[str, Any] = tomllib.load(file)
+        return data
 
 
-def find_wheel(
-    directory: Path,
-) -> Path:
+def find_wheel(directory: Path) -> Path:
     """
     Locate wheel artifact.
     """
-    return next(
-        directory.glob(
-            "*.whl",
-        ),
-    )
+    return next(directory.glob("*.whl"))
 
 
 def test_project_has_metadata() -> None:
@@ -73,11 +46,7 @@ def test_project_has_metadata() -> None:
     Project should define package metadata.
     """
     data = load_project_metadata()
-
-    assert (
-        "project"
-        in data
-    )
+    assert "project" in data
 
 
 def test_package_name_exists() -> None:
@@ -85,12 +54,8 @@ def test_package_name_exists() -> None:
     Package name should be defined.
     """
     data = load_project_metadata()
-
     project = data["project"]
-
-    assert project.get(
-        "name",
-    )
+    assert project.get("name")
 
 
 def test_package_version_exists() -> None:
@@ -98,23 +63,14 @@ def test_package_version_exists() -> None:
     Package version should be defined.
     """
     data = load_project_metadata()
-
     project = data["project"]
-
-    assert project.get(
-        "version",
-    )
+    assert project.get("version")
 
 
-def test_wheel_contains_metadata(
-    tmp_path: Path,
-) -> None:
+def test_wheel_contains_metadata(tmp_path: Path) -> None:
     """
     Wheel should contain dist-info metadata.
     """
-    import subprocess
-    import sys
-
     subprocess.run(
         [
             sys.executable,
@@ -128,37 +84,22 @@ def test_wheel_contains_metadata(
         check=True,
     )
 
-    wheel = find_wheel(
-        tmp_path,
-    )
+    wheel = find_wheel(tmp_path)
 
-    with zipfile.ZipFile(
-        wheel,
-    ) as archive:
-
+    with zipfile.ZipFile(wheel) as archive:
         files = archive.namelist()
 
     metadata_files = [
-        item
-        for item in files
-        if ".dist-info/METADATA"
-        in item
+        item for item in files if ".dist-info/METADATA" in item
     ]
 
-    assert len(
-        metadata_files,
-    ) == 1
+    assert len(metadata_files) == 1
 
 
-def test_wheel_is_valid_archive(
-    tmp_path: Path,
-) -> None:
+def test_wheel_is_valid_archive(tmp_path: Path) -> None:
     """
     Wheel should be a readable archive.
     """
-    import subprocess
-    import sys
-
     subprocess.run(
         [
             sys.executable,
@@ -172,10 +113,5 @@ def test_wheel_is_valid_archive(
         check=True,
     )
 
-    wheel = find_wheel(
-        tmp_path,
-    )
-
-    assert zipfile.is_zipfile(
-        wheel,
-  )
+    wheel = find_wheel(tmp_path)
+    assert zipfile.is_zipfile(wheel)
