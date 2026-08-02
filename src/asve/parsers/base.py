@@ -66,6 +66,5 @@ BaseParser = Parser
 
 __all__ = [
     "BaseParser",
-    "Parser",
     "ArtifactParser"
 ]
