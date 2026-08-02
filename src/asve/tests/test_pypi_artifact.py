@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import zipfile
 from pathlib import Path
+from typing import Any
 
 import sys
 
@@ -15,6 +16,19 @@ if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
+
+def load_project_metadata() -> dict[str, Any]:
+    """
+    Load project metadata from pyproject.toml.
+    """
+    with (
+        project_root()
+        / "pyproject.toml"
+    ).open(
+        "rb",
+    ) as file:
+        data: dict[str, Any] = tomllib.load(file)
+        return data
 
 
 def project_root() -> Path:
