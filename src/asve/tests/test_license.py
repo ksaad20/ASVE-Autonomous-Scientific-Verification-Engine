@@ -7,8 +7,23 @@ These tests validate open-source licensing information.
 from __future__ import annotations
 
 from pathlib import Path
-
 import tomllib
+import sys
+from typing import Any
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
+
+
+def load_pyproject() -> dict[str, Any]:
+    """
+    Load package metadata.
+    """
+    with (project_root() / "pyproject.toml").open("rb") as file:
+        data: dict[str, Any] = tomllib.load(file)
+        return data
 
 
 def project_root() -> Path:
