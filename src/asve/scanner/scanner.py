@@ -72,6 +72,5 @@ Scanner = FileScanner
 
 __all__ = [
     "FileScanner",
-    "Scanner",
     "ArtifactScanner"
 ]
