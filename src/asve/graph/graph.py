@@ -111,3 +111,7 @@ __all__ = [
     "EMPTY_GRAPH",
     "ScientificDependencyGraph",
   ]
+
+# At the bottom of src/asve/graph/graph.py, after the class definition:
+
+ScientificGraph = ScientificDependencyGraph
