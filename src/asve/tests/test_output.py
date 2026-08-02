@@ -20,7 +20,8 @@ class MockSeverity:
 class MockFinding:
     """Minimal finding mock for testing."""
 
-    def __init__(self, severity: str = "warning", message: str = "Mock finding") -> None:
+    def __init__(self, severity: str = "warning", 
+                 message: str = "Mock finding") -> None:
         self.severity = severity
         self.message = message
 
