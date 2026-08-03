@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from asve.parsers.registry import ParserRegistry
 from asve.parsers.base import BaseParser
+from asve.parsers.registry import ParserRegistry
 
 
 class DummyParser(BaseParser):
@@ -17,9 +17,23 @@ class DummyParser(BaseParser):
     Minimal parser implementation for testing.
     """
 
-    extensions = (
-        ".dummy",
-    )
+    @property
+    def name(self) -> str:
+        """
+        Return parser name.
+        """
+        return "dummy"
+
+    @property
+    def supported_extensions(self) -> frozenset[str]:
+        """
+        Return supported extensions.
+        """
+        return frozenset(
+            {
+                ".dummy",
+            },
+        )
 
     def parse(
         self,
