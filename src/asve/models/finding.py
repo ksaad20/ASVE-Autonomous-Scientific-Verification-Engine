@@ -1,124 +1,93 @@
 """
-Verification finding models.
+ASVE verification finding model.
 
-A finding is the primary output of the ASVE verification engine.
-
-Unlike Evidence, which records objective observations, a Finding
-represents an interpreted verification result produced by one or more
-verification rules.
-
-Findings are immutable, serializable, and suitable for inclusion in
-verification reports.
+Represents a detected issue, recommendation,
+or verification result produced by ASVE.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Final
-from uuid import uuid4
-
-from pydantic import BaseModel
-from pydantic import ConfigDict
-from pydantic import Field
+from pydantic import BaseModel, Field, field_validator
 
 from asve.models.severity import Severity
 
 
 class Finding(BaseModel):
     """
-    Scientific verification finding.
+    A verification finding.
+
+    Findings are intentionally backward compatible with
+    earlier ASVE versions.
     """
 
-    model_config = ConfigDict(
-        frozen=True,
-        extra="forbid",
-    )
-
-    identifier: str = Field(
-        default_factory=lambda: str(uuid4()),
-        description="Unique finding identifier.",
+    title: str = Field(
+        ...,
+        description="Finding title.",
     )
 
     rule_id: str = Field(
+        default="UNKNOWN",
         description="Verification rule identifier.",
     )
 
     artifact_id: str = Field(
+        default="UNKNOWN",
         description="Associated artifact identifier.",
     )
 
     severity: Severity = Field(
+        default=Severity.INFO,
         description="Finding severity.",
     )
 
-    title: str = Field(
-        min_length=1,
-        description="Short finding title.",
-    )
-
     description: str = Field(
-        min_length=1,
-        description="Detailed finding description.",
+        default="",
+        description="Finding description.",
     )
 
-    recommendation: str | None = Field(
-        default=None,
-        description="Suggested corrective action.",
+    @field_validator(
+        "severity",
+        mode="before",
     )
-
-    evidence_ids: tuple[str, ...] = Field(
-        default_factory=tuple,
-        description="Evidence supporting this finding.",
-    )
-
-    metadata: dict[str, str] = Field(
-        default_factory=dict,
-        description="Additional structured metadata.",
-    )
-
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        description="Creation timestamp.",
-    )
-
-    @property
-    def has_recommendation(self) -> bool:
+    @classmethod
+    def normalize_severity(
+        cls,
+        value: object,
+    ) -> Severity:
         """
-        Return True if a recommendation is available.
-        """
-        return self.recommendation is not None
+        Normalize legacy severity values.
 
-    @property
-    def is_failure(self) -> bool:
+        Supports old ASVE values such as ``low``.
         """
-        Return True if the finding represents a failure.
-        """
-        return self.severity.is_failure
+        if isinstance(
+            value,
+            Severity,
+        ):
+            return value
 
-    @property
-    def is_warning(self) -> bool:
-        """
-        Return True if the finding is advisory.
-        """
-        return self.severity.is_warning
+        if isinstance(
+            value,
+            str,
+        ):
+            mapping = {
+                "low": Severity.INFO,
+                "medium": Severity.WARNING,
+                "high": Severity.ERROR,
+                "critical": Severity.CRITICAL,
+            }
 
-    @property
-    def is_success(self) -> bool:
-        """
-        Return True if the finding is informational.
-        """
-        return self.severity.is_success
+            normalized = value.lower()
 
-    def __str__(self) -> str:
-        return (
-            f"[{self.severity.label}] "
-            f"{self.title}"
+            if normalized in mapping:
+                return mapping[normalized]
+
+            return Severity(normalized)
+
+        raise ValueError(
+            "Invalid severity value.",
         )
 
 
-EMPTY_FINDINGS: Final[tuple[Finding, ...]] = ()
-
 __all__ = [
-    "EMPTY_FINDINGS",
     "Finding",
 ]
