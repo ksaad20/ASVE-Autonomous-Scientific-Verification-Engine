@@ -1,14 +1,8 @@
 """
-JSON serialization utilities for ASVE.
+JSON serialization utilities for ASVE models.
 
-This module converts ASVE models into portable JSON-compatible
-representations.
-
-The serializer is designed for:
-- CI pipelines
-- reproducibility archives
-- APIs
-- downstream analysis tools
+Provides deterministic JSON serialization and deserialization
+compatible with ASVE persistence requirements.
 """
 
 from __future__ import annotations
@@ -20,40 +14,67 @@ from pydantic import BaseModel
 
 
 def serialize_json(
-    value: BaseModel,
-    *,
-    indent: int = 2,
+    obj: BaseModel | dict[str, Any],
 ) -> str:
     """
-    Serialize an ASVE model to JSON.
+    Serialize an ASVE object into deterministic JSON.
 
     Parameters
     ----------
-    value
-        Pydantic-based ASVE model.
-
-    indent
-        JSON indentation level.
+    obj
+        Pydantic model or dictionary.
 
     Returns
     -------
     str
         JSON representation.
     """
-    data: dict[str, Any] = value.model_dump()
+    if isinstance(obj, BaseModel):
+        data = obj.model_dump(
+            mode="json",
+        )
+    else:
+        data = obj
 
     return json.dumps(
         data,
-        indent=indent,
-        default=str,
+        sort_keys=True,
+        indent=2,
     )
 
-def deserialize_json(data: str) -> object:
-    """Stub for JSON deserialization."""
-    return {}
+
+def deserialize_json(
+    value: str,
+) -> dict[str, Any]:
+    """
+    Deserialize JSON into a dictionary.
+
+    Parameters
+    ----------
+    value
+        Serialized JSON string.
+
+    Returns
+    -------
+    dict[str, Any]
+        Restored object data.
+    """
+    result = json.loads(
+        value,
+    )
+
+    if not isinstance(
+        result,
+        dict,
+    ):
+        raise TypeError(
+            "Serialized JSON must represent an object.",
+        )
+
+    return result
 
 
 __all__ = [
     "serialize_json",
-    "deserialize_json"
+    "deserialize_json",
 ]
