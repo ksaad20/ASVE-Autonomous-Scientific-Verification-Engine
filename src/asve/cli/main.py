@@ -1,30 +1,22 @@
-"""ASVE command-line interface.
-
-Built on Typer for type-safe argument parsing and help generation.
-"""
+"""ASVE command-line interface."""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
 
 import typer
 
 from asve.api import verify
 
-app = typer.Typer(
-    name="ASVE",
-    help="Autonomous Scientific Verification Engine",
-)
+app = typer.Typer(name="ASVE", help="Autonomous Scientific Verification Engine")
+
+_PROJECT_PATH_ARG = typer.Argument(help="Path to the scientific project directory.")
+_VERSION_OPTION = typer.Option("--version", "-v", help="Show version and exit.", is_eager=True)
 
 
 @app.command("verify-project")
-def verify_project(
-    project_path: Path = typer.Argument(
-        ...,
-        help="Path to the scientific project directory.",
-    ),
-) -> None:
-    """Analyze a scientific project for reproducibility issues."""
+def verify_project(project_path: Annotated[Path, _PROJECT_PATH_ARG]) -> None:
     verify(project_path)
     typer.echo("Verification complete.")
 
@@ -36,17 +28,8 @@ def _version_callback(value: bool) -> None:
 
 
 @app.callback()
-def main(
-    version: bool = typer.Option(
-        False,
-        "--version",
-        "-v",
-        help="Show version and exit.",
-        is_eager=True,
-        callback=_version_callback,
-    ),
-) -> None:
-    """Autonomous Scientific Verification Engine."""
+def main(version: Annotated[bool, _VERSION_OPTION] = False) -> None:
+    _version_callback(version)
 
 
 if __name__ == "__main__":
