@@ -1,9 +1,8 @@
 """
 Severity levels for ASVE verification findings.
 
-Severity represents the significance of a verification finding.
-These values are intentionally stable because they form part of the
-public API and may appear in reports, plugins, and external tooling.
+Severity values are part of the public API and must remain
+stable for reports, serialization, and external integrations.
 """
 
 from __future__ import annotations
@@ -15,44 +14,45 @@ from typing import Final
 class Severity(str, Enum):
     """
     Verification severity levels.
+
+    The numeric level provides ordering compatibility while
+    string values provide stable serialization.
     """
 
     INFO = "info"
-
     RECOMMENDATION = "recommendation"
-
     WARNING = "warning"
-
     ERROR = "error"
-
     CRITICAL = "critical"
 
     @property
     def level(self) -> int:
         """
-        Return numeric severity priority.
+        Return severity priority level.
 
-        Higher values represent more severe findings.
+        Higher values indicate greater impact.
         """
-        return {
+        levels = {
             Severity.INFO: 10,
             Severity.RECOMMENDATION: 20,
             Severity.WARNING: 30,
             Severity.ERROR: 40,
             Severity.CRITICAL: 50,
-        }[self]
+        }
+
+        return levels[self]
 
     @property
     def label(self) -> str:
         """
-        Return a human-readable label.
+        Return human-readable severity label.
         """
         return self.value.capitalize()
 
     @property
     def is_failure(self) -> bool:
         """
-        Return True if this severity represents a verification failure.
+        Return whether severity indicates failure.
         """
         return self in {
             Severity.ERROR,
@@ -62,14 +62,14 @@ class Severity(str, Enum):
     @property
     def is_warning(self) -> bool:
         """
-        Return True if this severity is advisory.
+        Return whether severity is a warning.
         """
-        return self == Severity.WARNING
+        return self is Severity.WARNING
 
     @property
     def is_success(self) -> bool:
         """
-        Return True if no problem is indicated.
+        Return whether severity represents no failure.
         """
         return self in {
             Severity.INFO,
@@ -81,6 +81,6 @@ DEFAULT_SEVERITY: Final[Severity] = Severity.INFO
 
 
 __all__ = [
-    "DEFAULT_SEVERITY",
     "Severity",
+    "DEFAULT_SEVERITY",
 ]
