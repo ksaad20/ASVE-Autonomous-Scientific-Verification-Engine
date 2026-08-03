@@ -1,6 +1,6 @@
-"""Pytest fixtures for ASVE test suite.
+"""Pytest fixtures for the ASVE test suite.
 
-Provides reusable test infrastructure shared across modules.
+Provides reusable test infrastructure shared across test modules.
 """
 
 from __future__ import annotations
@@ -13,16 +13,13 @@ from asve.graph.graph import ScientificGraph
 
 
 @pytest.fixture
-def temporary_project(
-    tmp_path: Path,
-) -> Path:
+def temporary_project(tmp_path: Path) -> Path:
     """Create a minimal scientific project for testing.
 
     Returns
     -------
-    pathlib.Path
+    Path
         Directory containing ``paper.md`` and ``analysis.py``.
-
     """
     paper = tmp_path / "paper.md"
     paper.write_text(
