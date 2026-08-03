@@ -6,6 +6,7 @@ These tests validate automated execution behavior.
 
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 import os
 import sys
 
@@ -21,11 +22,9 @@ def test_package_runs_without_terminal() -> None:
     """
     Package should run without interactive input.
     """
-    assert (
-        hasattr(
-            sys,
-            "stdout",
-        )
+    assert hasattr(
+        sys,
+        "stdout",
     )
 
 
@@ -35,7 +34,7 @@ def test_environment_access() -> None:
     """
     assert isinstance(
         os.environ,
-        dict,
+        MutableMapping,
     )
 
 
