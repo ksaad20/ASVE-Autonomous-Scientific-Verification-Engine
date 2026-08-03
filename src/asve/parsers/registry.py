@@ -23,6 +23,24 @@ class ParserRegistry:
     """
     Registry of artifact parsers.
     """
+    def get_parser(
+        self,
+        path: Path,
+    ) -> ArtifactParser | None:
+        """
+        Compatibility alias for parser lookup.
+
+        Parameters
+        ----------
+        path
+            File path to resolve.
+
+        Returns
+        -------
+        ArtifactParser | None
+            Matching parser if registered.
+        """
+        return self.get(path)
 
     def __init__(self) -> None:
         self._parsers: dict[str, ArtifactParser] = {}
