@@ -11,11 +11,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Final
 
-__all__ = [
-    "DEFAULT_SEVERITY",
-    "Severity",
-]
-
 
 class Severity(str, Enum):
     """
@@ -64,3 +59,9 @@ class Severity(str, Enum):
 
 
 DEFAULT_SEVERITY: Final[Severity] = Severity.INFO
+
+
+__all__ = [
+    "DEFAULT_SEVERITY",
+    "Severity",
+]
