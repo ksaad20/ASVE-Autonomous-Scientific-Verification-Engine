@@ -43,20 +43,23 @@ class Artifact(BaseModel):
         extra="forbid",
     )
 
-    identifier: str = Field(
-        description="Globally unique artifact identifier."
+        identifier: str = Field(
+        default="",          # ← ADD THIS
+        description="Unique identifier for the artifact.",
     )
 
     name: str = Field(
-        description="Human-readable artifact name."
+        default="",          # ← ADD THIS
+        description="Human-readable name of the artifact.",
+    )
+
+    artifact_type: str = Field(
+        default="",          # ← ADD THIS
+        description="Classification of the artifact.",
     )
 
     path: Path = Field(
         description="Absolute or project-relative file path."
-    )
-
-    artifact_type: ArtifactType = Field(
-        description="Artifact classification."
     )
 
     size_bytes: int = Field(
