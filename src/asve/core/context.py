@@ -1,5 +1,4 @@
-"""
-ASVE analysis context models.
+"""ASVE analysis context models.
 
 This module provides the runtime state container shared between
 pipeline components during a reproducibility analysis run.
@@ -19,15 +18,14 @@ from asve.models.finding import Finding
 
 
 class AnalysisContext(BaseModel):
-    """
-    Runtime context for an ASVE analysis session.
-    """
+    """Runtime context for an ASVE analysis session."""
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
     )
 
     project_path: Path = Field(
+        default=Path("."),
         description="Root project directory.",
     )
 
@@ -55,21 +53,18 @@ class AnalysisContext(BaseModel):
         self,
         artifact: Artifact,
     ) -> None:
-        """
-        Register a discovered artifact.
-        """
+        """Register a discovered artifact."""
         self.artifacts.append(artifact)
 
     def add_finding(
         self,
         finding: Finding,
     ) -> None:
-        """
-        Register a verification finding.
-        """
+        """Register a verification finding."""
         self.findings.append(finding)
 
 
+# Backwards-compatible alias.
 ASVEContext = AnalysisContext
 
 __all__ = [
