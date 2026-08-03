@@ -18,10 +18,29 @@ class Severity(str, Enum):
     """
 
     INFO = "info"
+
     RECOMMENDATION = "recommendation"
+
     WARNING = "warning"
+
     ERROR = "error"
+
     CRITICAL = "critical"
+
+    @property
+    def level(self) -> int:
+        """
+        Return numeric severity priority.
+
+        Higher values represent more severe findings.
+        """
+        return {
+            Severity.INFO: 10,
+            Severity.RECOMMENDATION: 20,
+            Severity.WARNING: 30,
+            Severity.ERROR: 40,
+            Severity.CRITICAL: 50,
+        }[self]
 
     @property
     def label(self) -> str:
