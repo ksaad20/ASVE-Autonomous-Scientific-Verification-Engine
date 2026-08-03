@@ -14,26 +14,21 @@ from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
 
+from asve._compat import StrEnum
+
+
+class ArtifactType(StrEnum):
+    """Classification of scientific artifacts."""
+
+    DATA = "data"
+    CODE = "code"
+    DOCUMENT = "document"
+    CONFIG = "config"
+    UNKNOWN = "unknown"
+
 
 class Artifact(BaseModel):
-    """A scientific artifact discovered during analysis.
-
-    Attributes
-    ----------
-    path : pathlib.Path
-        Absolute or relative path to the artifact.
-    identifier : str
-        Unique identifier for the artifact.
-    name : str
-        Human-readable name.
-    artifact_type : str
-        Classification of the artifact.
-    created_at : datetime
-        Timestamp when the artifact was first observed.
-    metadata : dict[str, str]
-        Additional artifact metadata.
-
-    """
+    """A scientific artifact discovered during analysis."""
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -74,4 +69,5 @@ class Artifact(BaseModel):
 
 __all__ = [
     "Artifact",
+    "ArtifactType",
 ]
