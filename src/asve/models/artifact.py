@@ -8,13 +8,13 @@ from __future__ import annotations
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
-from typing import Any
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
 
 from asve._compat import StrEnum
+from asve.models.metadata import Metadata
 
 
 class ArtifactType(StrEnum):
@@ -58,13 +58,19 @@ class Artifact(BaseModel):
         description="Timestamp when the artifact was first observed.",
     )
 
-    metadata: dict[str, str] = Field(
-        default_factory=dict,
+    metadata: Metadata = Field(
+        default_factory=Metadata,
         description="Additional artifact metadata.",
     )
 
     def __repr__(self) -> str:
-        return f"Artifact(path={self.path!r})"
+        """Return a developer-friendly representation."""
+        return (
+            f"Artifact("
+            f"path={self.path!r}, "
+            f"artifact_type={self.artifact_type!r}"
+            f")"
+        )
 
 
 __all__ = [
