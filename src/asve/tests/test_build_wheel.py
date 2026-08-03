@@ -17,7 +17,7 @@ def project_root() -> Path:
     """
     return Path(
         __file__,
-    ).parents[1]
+    ).parents[3]
 
 
 def test_build_module_available() -> None:
