@@ -8,7 +8,7 @@ public API and may appear in reports, plugins, and external tooling.
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from typing import Final
 
 __all__ = [
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-class Severity(StrEnum):
+class Severity(str,Enum):
     """
     Verification severity levels.
     """
