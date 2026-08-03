@@ -1,25 +1,36 @@
-"""
-Public API for ASVE.
+"""Public API surface for ASVE.
+
+Implements the high-level ``verify`` function that orchestrates a
+complete reproducibility analysis.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
-from asve.core.factory import ASVEFactory
+from asve.core.pipeline import ASVEPipeline
+from asve.verification.report import VerificationReport
 
 
-def create_pipeline(config: dict[str, Any]) -> Any:
+def verify(path: str | Path) -> VerificationReport:
+    """Run a full ASVE verification on *path*.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        Root directory of the scientific project to analyze.
+
+    Returns
+    -------
+    VerificationReport
+        Structured findings from the analysis.
+
+    Examples
+    --------
+    >>> report = verify("./my-project")
+    >>> report.total_findings
+    0
+
     """
-    Create a verification pipeline.
-    """
-    pipeline = ASVEFactory.create_pipeline()
-    return pipeline
-
-
-def verify(target: str | Path, **kwargs: Any) -> Any:
-    """
-    Run verification on a target artifact.
-    """
-    return {}  # TODO: implement
+    pipeline = ASVEPipeline()
+    return pipeline.analyze(path)
