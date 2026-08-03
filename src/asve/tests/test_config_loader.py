@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-import tomllib
-
 import pytest
-
 from asve.core.config import ASVEConfig
 from asve.core.config_loader import load_config
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 
 def test_load_default_config(
