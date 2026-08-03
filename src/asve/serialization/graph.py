@@ -31,11 +31,11 @@ def serialize_graph(
     return {
         "nodes": [
             node.model_dump()
-            for node in graph.nodes()
+            for node in graph.nodes
         ],
         "edges": [
             edge.model_dump()
-            for edge in graph.edges()
+            for edge in graph.edges
         ],
     }
 
