@@ -110,14 +110,6 @@ class ParserRegistry:
 
     def __repr__(self) -> str:
         return (
-            f"{self.__class__.__name__}"
-            f"(parsers={len(self)})"
+            f"{self.__class__.__name__}("
+            f"extensions={self.extensions()!r})"
         )
-
-
-registry = ParserRegistry()
-
-__all__ = [
-    "ParserRegistry",
-    "registry",
-]
