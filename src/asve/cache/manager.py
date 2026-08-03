@@ -68,6 +68,15 @@ class CacheManager:
         """
         self._cache.clear()
 
+    def exists(
+        self,
+        key: str,
+   ) -> bool:
+        """
+        Return whether a cache entry exists.
+        """
+    return key in self._cache
+
     def __contains__(
         self,
         key: str,
