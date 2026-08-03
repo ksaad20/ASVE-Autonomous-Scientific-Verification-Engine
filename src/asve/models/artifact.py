@@ -10,8 +10,7 @@ participate in computational research workflows.
 
 from __future__ import annotations
 
-from datetime import UTC
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -72,7 +71,7 @@ class Artifact(BaseModel):
     )
 
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
+        default_factory=lambda: datetime.now(timezone.utc),
     )
 
     metadata: dict[str, str] = Field(
