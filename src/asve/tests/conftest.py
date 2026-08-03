@@ -1,8 +1,6 @@
-"""
-Shared pytest fixtures for ASVE.
+"""Pytest fixtures for ASVE test suite.
 
-This module provides reusable testing resources for scanner,
-verification, graph, and pipeline tests.
+Provides reusable test infrastructure shared across modules.
 """
 
 from __future__ import annotations
@@ -12,65 +10,36 @@ from pathlib import Path
 import pytest
 
 from asve.graph.graph import ScientificGraph
-from asve.models.artifact import Artifact
 
 
 @pytest.fixture
 def temporary_project(
     tmp_path: Path,
 ) -> Path:
-    """
-    Create a minimal scientific project.
-
-    Parameters
-    ----------
-    tmp_path
-        Pytest temporary directory.
+    """Create a minimal scientific project for testing.
 
     Returns
     -------
-    Path
-        Project directory.
+    pathlib.Path
+        Directory containing ``paper.md`` and ``analysis.py``.
+
     """
-    project = tmp_path / "project"
-
-    project.mkdir()
-
-    (project / "paper.md").write_text(
-        "# Example Research Project\n",
+    paper = tmp_path / "paper.md"
+    paper.write_text(
+        "# Research Paper\n\nAbstract.\n",
         encoding="utf-8",
     )
 
-    (project / "analysis.py").write_text(
-        "print('analysis')\n",
+    analysis = tmp_path / "analysis.py"
+    analysis.write_text(
+        "def calculate(value):\n    return value * 2\n",
         encoding="utf-8",
     )
 
-    return project
+    return tmp_path
 
 
 @pytest.fixture
 def empty_graph() -> ScientificGraph:
-    """
-    Return an empty scientific graph.
-    """
+    """Return an empty scientific dependency graph."""
     return ScientificGraph()
-
-
-@pytest.fixture
-def sample_artifact(
-    tmp_path: Path,
-) -> Artifact:
-    """
-    Create a sample artifact.
-    """
-    path = tmp_path / "example.py"
-
-    path.write_text(
-        "print('hello')\n",
-        encoding="utf-8",
-    )
-
-    return Artifact(
-        path=path,
-    )
