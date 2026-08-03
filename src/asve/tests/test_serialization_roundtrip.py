@@ -9,10 +9,7 @@ from __future__ import annotations
 import json
 
 from asve.models.finding import Finding
-from asve.serialization.json import (
-    serialize_json,
-    deserialize_json,
-)
+from asve.serialization.json import deserialize_json, serialize_json
 
 
 def create_finding() -> Finding:
@@ -21,7 +18,9 @@ def create_finding() -> Finding:
     """
     return Finding(
         title="test finding",
-        severity="low",
+        rule_id="TEST001",
+        artifact_id="artifact-test",
+        severity="warning",
         description="example",
     )
 
@@ -32,14 +31,9 @@ def test_object_serializes_to_json() -> None:
     """
     finding = create_finding()
 
-    output = serialize_json(
-        finding,
-    )
+    output = serialize_json(finding)
 
-    assert isinstance(
-        output,
-        str,
-    )
+    assert isinstance(output, str)
 
 
 def test_serialized_output_is_valid_json() -> None:
@@ -48,18 +42,11 @@ def test_serialized_output_is_valid_json() -> None:
     """
     finding = create_finding()
 
-    output = serialize_json(
-        finding,
-    )
+    output = serialize_json(finding)
 
-    data = json.loads(
-        output,
-    )
+    data = json.loads(output)
 
-    assert isinstance(
-        data,
-        dict,
-    )
+    assert isinstance(data, dict)
 
 
 def test_roundtrip_preserves_data() -> None:
@@ -68,26 +55,15 @@ def test_roundtrip_preserves_data() -> None:
     """
     finding = create_finding()
 
-    serialized = serialize_json(
-        finding,
-    )
+    serialized = serialize_json(finding)
 
     restored = deserialize_json(
         serialized,
         Finding,
     )
 
-    assert (
-        restored.title
-        ==
-        finding.title
-    )
-
-    assert (
-        restored.severity
-        ==
-        finding.severity
-    )
+    assert restored.title == finding.title
+    assert restored.severity == finding.severity
 
 
 def test_roundtrip_is_deterministic() -> None:
@@ -96,12 +72,7 @@ def test_roundtrip_is_deterministic() -> None:
     """
     finding = create_finding()
 
-    first = serialize_json(
-        finding,
-    )
-
-    second = serialize_json(
-        finding,
-    )
+    first = serialize_json(finding)
+    second = serialize_json(finding)
 
     assert first == second
