@@ -13,8 +13,7 @@ verification reports.
 
 from __future__ import annotations
 
-from datetime import UTC
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Final
 from uuid import uuid4
 
@@ -78,7 +77,7 @@ class Finding(BaseModel):
     )
 
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Creation timestamp.",
     )
 
