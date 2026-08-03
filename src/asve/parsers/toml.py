@@ -9,8 +9,12 @@ delegates artifact creation to StructuredDataParser.
 
 from __future__ import annotations
 
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 from asve.exceptions import ParserError
 from asve.parsers.structured import StructuredDataParser
@@ -36,7 +40,7 @@ class TOMLParser(StructuredDataParser):
         return frozenset(
             {
                 ".toml",
-            }
+            },
         )
 
     def parse_content(self, path: Path) -> None:
@@ -58,11 +62,11 @@ class TOMLParser(StructuredDataParser):
                 tomllib.load(stream)
         except OSError as exc:
             raise ParserError(
-                f"Unable to read TOML file '{path}'."
+                f"Unable to read TOML file '{path}'.",
             ) from exc
         except tomllib.TOMLDecodeError as exc:
             raise ParserError(
-                f"Invalid TOML document '{path}'."
+                f"Invalid TOML document '{path}'.",
             ) from exc
 
 
