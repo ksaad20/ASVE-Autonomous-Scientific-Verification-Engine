@@ -1,5 +1,8 @@
 [build-system]
-requires = ["setuptools>=75.0", "wheel"]
+requires = [
+    "setuptools>=75.0",
+    "wheel>=0.45",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,10 +10,14 @@ name = "asve"
 version = "0.0.1"
 description = "Automated Scientific Verification Engine: Open-source scientific verification for reproducible computational research."
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+requires-python = ">=3.10,<4"
+license = "Apache-2.0"
 
 authors = [
+    { name = "Asif Kazi" },
+]
+
+maintainers = [
     { name = "Asif Kazi" },
 ]
 
@@ -67,7 +74,7 @@ dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.12",
-    "tomli>=1.1.0 ; python_version < '3.11'",
+    "tomli>=2.0.1 ; python_version < '3.11'",
     "twine>=6.1",
 ]
 
@@ -77,31 +84,45 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/asve"
-Documentation = "https://github.com/yourusername/asve"
-Repository = "https://github.com/yourusername/asve"
-Issues = "https://github.com/yourusername/asve/issues"
-Changelog = "https://github.com/yourusername/asve/releases"
+Homepage = "https://github.com/ksaad20/asve"
+Documentation = "https://github.com/ksaad20/asve"
+Repository = "https://github.com/ksaad20/asve"
+Issues = "https://github.com/ksaad20/asve/issues"
+Changelog = "https://github.com/ksaad20/asve/releases"
 
 [project.scripts]
 asve = "asve.cli:app"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+exclude = [
+    "tests",
+    "tests.*",
+]
 
 [tool.setuptools.package-data]
-"asve" = ["py.typed"]
+asve = [
+    "py.typed",
+]
 
 [tool.black]
 line-length = 88
-target-version = ["py310", "py311", "py312", "py313"]
+target-version = [
+    "py310",
+    "py311",
+    "py312",
+    "py313",
+]
 
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+fix = true
+show-fixes = true
 
 [tool.ruff.lint]
 select = [
@@ -119,11 +140,15 @@ ignore = []
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
-known-first-party = ["asve"]
+known-first-party = [
+    "asve",
+]
 
 [tool.mypy]
 python_version = "3.10"
-mypy_path = ["src"]
+mypy_path = [
+    "src",
+]
 namespace_packages = true
 explicit_package_bases = true
 strict = true
@@ -152,8 +177,12 @@ module = "tomli"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["src/asve/tests"]
-pythonpath = ["src"]
+testpaths = [
+    "src/asve/tests",
+]
+pythonpath = [
+    "src",
+]
 addopts = [
     "--strict-markers",
     "--strict-config",
@@ -162,12 +191,18 @@ addopts = [
     "--cov-report=xml",
 ]
 xfail_strict = true
+filterwarnings = [
+    "error",
+]
 
 [tool.coverage.run]
-source = ["src/asve"]
+source = [
+    "src/asve",
+]
 branch = true
 
 [tool.coverage.report]
+fail_under = 80
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
@@ -178,5 +213,9 @@ exclude_lines = [
 ]
 
 [tool.bandit]
-exclude_dirs = ["src/asve/tests"]
-skips = ["B101"]
+exclude_dirs = [
+    "src/asve/tests",
+]
+skips = [
+    "B101",
+]
