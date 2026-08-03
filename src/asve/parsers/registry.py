@@ -13,6 +13,7 @@ The registry is intentionally lightweight and deterministic.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
 from asve.parsers.base import ArtifactParser
@@ -105,7 +106,7 @@ class ParserRegistry:
     def __len__(self) -> int:
         return len(self.parsers())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[ArtifactParser]:
         yield from self.parsers()
 
     def __repr__(self) -> str:
@@ -113,3 +114,10 @@ class ParserRegistry:
             f"{self.__class__.__name__}("
             f"extensions={self.extensions()!r})"
         )
+
+
+# Default global parser registry.
+#
+# This singleton allows parser dispatch components to share one registry
+# without requiring explicit dependency wiring throughout the package.
+registry = ParserRegistry()
