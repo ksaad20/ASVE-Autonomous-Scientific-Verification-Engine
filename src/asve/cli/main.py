@@ -1,49 +1,53 @@
-"""
-ASVE command-line entry point.
+"""ASVE command-line interface.
 
-This module provides the terminal interface for running scientific
-reproducibility verification workflows.
+Built on Typer for type-safe argument parsing and help generation.
 """
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from typing import Annotated
 
 import typer
 
 from asve.api import verify
 
 app = typer.Typer(
-    name="asve",
-    help=(
-        "Automated Scientific Verification Engine "
-        "for reproducible research."
-    ),
+    name="ASVE",
+    help="Autonomous Scientific Verification Engine",
 )
 
 
-@app.command()
+@app.command("verify-project")
 def verify_project(
-    project_path: Annotated[
-        Path,
-        typer.Argument(help="Path to the scientific project."),
-    ],
+    project_path: Path = typer.Argument(
+        ...,
+        help="Path to the scientific project directory.",
+    ),
 ) -> None:
-    """Verify a scientific project."""
-    report = verify(project_path)
-
-    typer.echo(report.summary())
-
-    if report.has_errors:
-        raise typer.Exit(code=1)
+    """Analyze a scientific project for reproducibility issues."""
+    verify(project_path)
+    typer.echo("Verification complete.")
 
 
-def main() -> None:
-    """Run the ASVE CLI."""
-    app()
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo("ASVE 0.1.0")
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-v",
+        help="Show version and exit.",
+        is_eager=True,
+        callback=_version_callback,
+    ),
+) -> None:
+    """Autonomous Scientific Verification Engine."""
 
 
 if __name__ == "__main__":
-    main()
+    app()
