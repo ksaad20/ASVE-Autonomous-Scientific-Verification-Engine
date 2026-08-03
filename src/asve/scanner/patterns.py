@@ -9,11 +9,11 @@ Future versions may include content-based classification.
 
 from __future__ import annotations
 
-from enum import StrEnum
 from pathlib import Path
+from enum import Enum
 
 
-class ArtifactPattern(StrEnum):
+class ArtifactPattern(str, Enum):
     """
     Scientific artifact categories.
     """
