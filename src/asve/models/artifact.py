@@ -1,112 +1,77 @@
-"""
-Scientific artifact models.
+"""Artifact model for ASVE.
 
-This module defines the core representation of a research artifact within
-the Automated Scientific Verification Engine (ASVE).
-
-Artifacts are immutable metadata objects describing files that
-participate in computational research workflows.
+Represents a discovered scientific artifact within a project.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
-from typing import Literal
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
 
 
-ArtifactType = Literal[
-    "document",
-    "dataset",
-    "software",
-    "notebook",
-    "figure",
-    "table",
-    "reference",
-    "configuration",
-    "supplementary",
-    "unknown",
-]
-
-
 class Artifact(BaseModel):
-    """
-    Scientific research artifact.
+    """A scientific artifact discovered during analysis.
+
+    Attributes
+    ----------
+    path : pathlib.Path
+        Absolute or relative path to the artifact.
+    identifier : str
+        Unique identifier for the artifact.
+    name : str
+        Human-readable name.
+    artifact_type : str
+        Classification of the artifact.
+    created_at : datetime
+        Timestamp when the artifact was first observed.
+    metadata : dict[str, str]
+        Additional artifact metadata.
+
     """
 
     model_config = ConfigDict(
-        frozen=True,
-        extra="forbid",
+        arbitrary_types_allowed=True,
     )
 
-        identifier: str = Field(
-        default="",          # ← ADD THIS
+    path: Path = Field(
+        description="Path to the artifact file or directory.",
+    )
+
+    identifier: str = Field(
+        default="",
         description="Unique identifier for the artifact.",
     )
 
     name: str = Field(
-        default="",          # ← ADD THIS
+        default="",
         description="Human-readable name of the artifact.",
     )
 
     artifact_type: str = Field(
-        default="",          # ← ADD THIS
-        description="Classification of the artifact.",
-    )
-
-    path: Path = Field(
-        description="Absolute or project-relative file path."
-    )
-
-    size_bytes: int = Field(
-        default=0,
-        ge=0,
-        description="File size in bytes.",
-    )
-
-    checksum: str = Field(
         default="",
-        description="Optional content checksum.",
+        description="Classification of the artifact.",
     )
 
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp when the artifact was first observed.",
     )
 
     metadata: dict[str, str] = Field(
         default_factory=dict,
+        description="Additional artifact metadata.",
     )
 
-    @property
-    def extension(self) -> str:
-        """
-        Return the artifact file extension.
-        """
-        return self.path.suffix.lower()
-
-    @property
-    def exists(self) -> bool:
-        """
-        Return True if the artifact exists on disk.
-        """
-        return self.path.exists()
-
-    @property
-    def filename(self) -> str:
-        """
-        Return the filename.
-        """
-        return self.path.name
-
-    def __str__(self) -> str:
-        return f"{self.artifact_type}: {self.name}"
+    def __repr__(self) -> str:
+        return f"Artifact(path={self.path!r})"
 
 
 __all__ = [
     "Artifact",
-    "ArtifactType",
 ]
