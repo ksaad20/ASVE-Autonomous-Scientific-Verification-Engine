@@ -57,13 +57,10 @@ def test_roundtrip_preserves_data() -> None:
 
     serialized = serialize_json(finding)
 
-    restored = deserialize_json(
-        serialized,
-        Finding,
-    )
+    restored = deserialize_json(serialized)
 
-    assert restored.title == finding.title
-    assert restored.severity == finding.severity
+    assert restored["title"] == finding.title
+    assert restored["severity"] == finding.severity.value
 
 
 def test_roundtrip_is_deterministic() -> None:
