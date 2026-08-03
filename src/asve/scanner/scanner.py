@@ -1,86 +1,77 @@
-"""Artifact scanner for ASVE.
+"""
+Project scanner implementation for ASVE.
 
-Discovers scientific artifacts within a project directory while
-respecting ignore patterns (e.g., version-control metadata).
+The scanner discovers project artifacts and returns
+portable artifact collections for downstream verification.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 from asve.models.artifact import Artifact
+from asve.scanner.registry import ArtifactRegistry
 
 
-class ArtifactScanner:
-    """Discovers files and directories that constitute scientific artifacts.
-
-    Hidden directories (those starting with ``.``) are skipped to avoid
-    version-control metadata and transient files.
-
-    Examples
-    --------
-    >>> scanner = ArtifactScanner()
-    >>> artifacts = scanner.scan("./project")
-    >>> len(artifacts) >= 0
-    True
-
+class Scanner:
+    """
+    Discover artifacts inside a project directory.
     """
 
     def __init__(
         self,
-        registry: Any | None = None,
-        **kwargs: Any,
+        registry: ArtifactRegistry,
     ) -> None:
-        """Initialize the scanner.
-
-        Parameters
-        ----------
-        registry : Any or None
-            Optional artifact registry for lookups.
-        **kwargs : Any
-            Reserved for future extension.
-
         """
-        self._registry = registry
-
-    def scan(self, path: str | Path) -> tuple[Artifact, ...]:
-        """Scan *path* for discoverable artifacts.
+        Initialize scanner.
 
         Parameters
         ----------
-        path : str or pathlib.Path
-            Project root to scan.
+        registry
+            Artifact detection registry.
+        """
+        self.registry = registry
+
+    def scan(
+        self,
+        path: Path,
+    ) -> list[Artifact]:
+        """
+        Scan a project directory.
+
+        Parameters
+        ----------
+        path
+            Project path.
 
         Returns
         -------
-        tuple[Artifact, ...]
-            Discovered artifacts. Returns an empty tuple if *path*
-            does not exist.
-
+        list[Artifact]
+            Discovered artifacts.
         """
-        project_path = Path(path)
-        if not project_path.exists():
-            return ()
-
         artifacts: list[Artifact] = []
-        for file_path in project_path.rglob("*"):
+
+        if not path.exists() or not path.is_dir():
+            return artifacts
+
+        for file_path in sorted(
+            path.rglob("*"),
+        ):
             if not file_path.is_file():
                 continue
 
-            rel_parts = file_path.relative_to(project_path).parts
-            if any(part.startswith(".") for part in rel_parts):
-                continue
+            artifact = self.registry.detect(
+                file_path,
+            )
 
-            artifacts.append(Artifact(path=file_path))
+            if artifact is not None:
+                artifacts.append(
+                    artifact,
+                )
 
-        return tuple(artifacts)
+        return artifacts
 
-
-# Backwards-compatible alias used by older tests.
-Scanner = ArtifactScanner
 
 __all__ = [
-    "ArtifactScanner",
     "Scanner",
 ]
