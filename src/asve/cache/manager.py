@@ -12,26 +12,21 @@ class CacheManager:
     """
     Simple in-memory cache manager.
 
-    The cache path is retained for future persistence support.
+    Parameters
+    ----------
+    path
+        Optional cache directory. Stored for compatibility with future
+        persistent cache implementations.
     """
 
     def __init__(
         self,
-        path: Path | str | None = None,
+        path: Path | None = None,
     ) -> None:
         """
-        Initialize the cache.
-
-        Parameters
-        ----------
-        path
-            Optional cache directory.
+        Initialize the cache manager.
         """
-        self.path = (
-            Path(path)
-            if path is not None
-            else None
-        )
+        self.path = path
         self._cache: dict[str, Any] = {}
 
     def get(
@@ -40,6 +35,16 @@ class CacheManager:
     ) -> Any | None:
         """
         Retrieve a cached value.
+
+        Parameters
+        ----------
+        key
+            Cache key.
+
+        Returns
+        -------
+        Any | None
+            Cached value if present, otherwise ``None``.
         """
         return self._cache.get(key)
 
@@ -49,7 +54,14 @@ class CacheManager:
         value: Any,
     ) -> None:
         """
-        Store a cached value.
+        Store a value in the cache.
+
+        Parameters
+        ----------
+        key
+            Cache key.
+        value
+            Value to cache.
         """
         self._cache[key] = value
 
@@ -58,30 +70,51 @@ class CacheManager:
         key: str,
     ) -> None:
         """
-        Remove a cached value.
+        Remove a cached entry.
+
+        Parameters
+        ----------
+        key
+            Cache key.
         """
         self._cache.pop(key, None)
 
     def clear(self) -> None:
         """
-        Remove all cached values.
+        Remove all cached entries.
         """
         self._cache.clear()
 
     def exists(
         self,
         key: str,
-   ) -> bool:
+    ) -> bool:
         """
         Return whether a cache entry exists.
+
+        Parameters
+        ----------
+        key
+            Cache key.
+
+        Returns
+        -------
+        bool
+            ``True`` if the key exists.
         """
-    return key in self._cache
+        return key in self._cache
 
     def __contains__(
         self,
         key: str,
     ) -> bool:
-        return key in self._cache
+        """
+        Support the ``in`` operator.
+        """
+        return self.exists(key)
 
     def __len__(self) -> int:
+        """
+        Return the number of cached entries.
+        """
         return len(self._cache)
