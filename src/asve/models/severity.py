@@ -12,24 +12,20 @@ from enum import Enum
 from typing import Final
 
 __all__ = [
-    "Severity",
     "DEFAULT_SEVERITY",
+    "Severity",
 ]
 
 
-class Severity(str,Enum):
+class Severity(str, Enum):
     """
     Verification severity levels.
     """
 
     INFO = "info"
-
     RECOMMENDATION = "recommendation"
-
     WARNING = "warning"
-
     ERROR = "error"
-
     CRITICAL = "critical"
 
     @property
