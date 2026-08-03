@@ -1,127 +1,69 @@
-"""
-Verification finding models for ASVE.
+"""Finding model for ASVE verification subsystem.
 
-A finding represents a detected reproducibility issue, validation
-result, or scientific consistency observation produced by the
-verification engine.
+Represents a single reproducibility or verification issue.
 """
 
 from __future__ import annotations
 
-from asve._compat import StrEnum
-from uuid import uuid4
+from typing import Any
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
 
+from asve._compat import StrEnum
+
 
 class FindingSeverity(StrEnum):
-    """
-    Severity classification for verification findings.
-    """
+    """Severity levels for verification findings."""
 
     INFO = "info"
-
     LOW = "low"
-
+    RECOMMENDATION = "recommendation"
     WARNING = "warning"
-
     ERROR = "error"
-
     CRITICAL = "critical"
 
 
-class FindingCategory(StrEnum):
-    """
-    Verification finding categories.
-    """
-
-    CITATION = "citation"
-
-    DEPENDENCY = "dependency"
-
-    DATASET = "dataset"
-
-    STRUCTURE = "structure"
-
-    SOFTWARE = "software"
-
-    REPRODUCIBILITY = "reproducibility"
-
-    UNKNOWN = "unknown"
-
-
 class Finding(BaseModel):
-    """
-    Immutable ASVE verification finding.
-    """
+    """A single reproducibility or verification finding."""
 
     model_config = ConfigDict(
-        frozen=True,
-        extra="forbid",
-    )
-
-    identifier: str = Field(
-        default_factory=lambda: str(uuid4()),
-        description="Unique finding identifier.",
+        extra="allow",
     )
 
     title: str = Field(
-        min_length=1,
-        description="Short finding description.",
+        description="Short description of the finding.",
     )
 
     description: str = Field(
-        min_length=1,
-        description="Detailed explanation.",
+        default="",
+        description="Detailed explanation of the finding.",
     )
 
     severity: FindingSeverity = Field(
         default=FindingSeverity.LOW,
-        default=FindingSeverity.WARNING,
-    )
-
-    category: FindingCategory = Field(
-        default=FindingCategory.UNKNOWN,
+        description="Impact level of the finding.",
     )
 
     rule_id: str | None = Field(
-        default=None,                   # ← ADD default=
+        default=None,
         description="Rule that triggered this finding.",
     )
 
     artifact_id: str | None = Field(
         default=None,
-        description="Related artifact identifier.",
+        description="Artifact associated with this finding.",
     )
 
-    location: str | None = Field(
-        default=None,
-        description="Source location.",
-    )
-
-    recommendation: str | None = Field(
-        default=None,
-        description="Suggested remediation.",
-    )
-
-    metadata: dict[str, str] = Field(
-        default_factory=dict,
-    )
-
-    def __str__(self) -> str:
-        """
-        Return readable finding representation.
-        """
+    def __repr__(self) -> str:
         return (
-            f"[{self.severity.value.upper()}] "
-            f"{self.title}"
+            f"Finding(title={self.title!r}, "
+            f"severity={self.severity})"
         )
 
 
 __all__ = [
     "Finding",
-    "FindingCategory",
     "FindingSeverity",
 ]
