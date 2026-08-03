@@ -10,8 +10,8 @@ be introduced without changing the graph architecture.
 """
 
 from __future__ import annotations
-
-from enum import StrEnum
+      
+from asve._compat import StrEnum  # NEW — works on all versions
 from typing import Final
 from uuid import uuid4
 
