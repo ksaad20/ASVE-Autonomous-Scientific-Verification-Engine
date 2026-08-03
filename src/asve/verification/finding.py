@@ -23,6 +23,8 @@ class FindingSeverity(StrEnum):
 
     INFO = "info"
 
+    LOW = "low"
+
     WARNING = "warning"
 
     ERROR = "error"
@@ -76,11 +78,17 @@ class Finding(BaseModel):
     )
 
     severity: FindingSeverity = Field(
+        default=FindingSeverity.LOW,
         default=FindingSeverity.WARNING,
     )
 
     category: FindingCategory = Field(
         default=FindingCategory.UNKNOWN,
+    )
+
+    rule_id: str | None = Field(
+        default=None,                   # ← ADD default=
+        description="Rule that triggered this finding.",
     )
 
     artifact_id: str | None = Field(
