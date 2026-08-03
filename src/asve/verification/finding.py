@@ -8,7 +8,7 @@ verification engine.
 
 from __future__ import annotations
 
-from enum import StrEnum
+from asve._compat import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel
