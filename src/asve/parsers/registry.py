@@ -1,141 +1,80 @@
 """
 Parser registry for ASVE.
 
-The parser registry maintains the mapping between filename extensions
-and parser implementations.
-
-Concrete parsers register themselves with this registry, allowing the
-remainder of the application to discover parsers without importing them
-directly.
-
-The registry is intentionally lightweight and deterministic.
+Maintains registered parsers and selects the appropriate
+parser for input artifacts.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from pathlib import Path
 
-from asve.parsers.base import ArtifactParser
+from asve.parsers.base import Parser
 
 
 class ParserRegistry:
     """
-    Registry of artifact parsers.
+    Registry of available parsers.
     """
-    def get_parser(
-        self,
-        path: Path,
-    ) -> ArtifactParser | None:
-        """
-        Compatibility alias for parser lookup.
-
-        Parameters
-        ----------
-        path
-            File path to resolve.
-
-        Returns
-        -------
-        ArtifactParser | None
-            Matching parser if registered.
-        """
-        return self.get(path)
 
     def __init__(self) -> None:
-        self._parsers: dict[str, ArtifactParser] = {}
+        """
+        Initialize empty parser registry.
+        """
+        self._parsers: list[Parser] = []
 
-    def register(self, parser: ArtifactParser) -> None:
+    def register(
+        self,
+        parser: Parser,
+    ) -> None:
         """
         Register a parser.
 
         Parameters
         ----------
         parser
-            Parser instance to register.
-
-        Raises
-        ------
-        ValueError
-            If a parser is already registered for one of its supported
-            extensions.
+            Parser implementation.
         """
-        for extension in parser.supported_extensions:
-            key = extension.lower()
+        self._parsers.append(
+            parser,
+        )
 
-            if key in self._parsers:
-                raise ValueError(
-                    f"Parser already registered for '{key}'."
-                )
-
-            self._parsers[key] = parser
-
-    def unregister(self, extension: str) -> None:
+    def get_parser(
+        self,
+        path: Path,
+    ) -> Parser | None:
         """
-        Remove a parser.
-
-        Missing extensions are ignored.
-        """
-        self._parsers.pop(extension.lower(), None)
-
-    def get(self, path: Path) -> ArtifactParser | None:
-        """
-        Return the parser for a file.
+        Return parser matching a file.
 
         Parameters
         ----------
         path
-            File to parse.
+            File path.
 
         Returns
         -------
-        ArtifactParser | None
-            Registered parser, if available.
+        Parser | None
+            Matching parser or None.
         """
-        return self._parsers.get(path.suffix.lower())
+        for parser in self._parsers:
+            if parser.supports(
+                path,
+            ):
+                return parser
 
-    def supports(self, path: Path) -> bool:
-        """
-        Return True if a parser exists for the file.
-        """
-        return self.get(path) is not None
+        return None
 
-    def extensions(self) -> tuple[str, ...]:
+    def parsers(
+        self,
+    ) -> list[Parser]:
         """
-        Return registered extensions.
+        Return registered parsers.
         """
-        return tuple(sorted(self._parsers))
-
-    def parsers(self) -> tuple[ArtifactParser, ...]:
-        """
-        Return unique registered parsers.
-        """
-        return tuple(dict.fromkeys(self._parsers.values()))
-
-    def clear(self) -> None:
-        """
-        Remove every registered parser.
-        """
-        self._parsers.clear()
-
-    def __contains__(self, extension: str) -> bool:
-        return extension.lower() in self._parsers
-
-    def __len__(self) -> int:
-        return len(self.parsers())
-
-    def __iter__(self) -> Iterator[ArtifactParser]:
-        yield from self.parsers()
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"extensions={self.extensions()!r})"
+        return list(
+            self._parsers,
         )
 
 
-# Default global parser registry.
-#
-# This singleton allows parser dispatch components to share one registry
-# without requiring explicit dependency wiring throughout the package.
-registry = ParserRegistry()
+__all__ = [
+    "ParserRegistry",
+]
