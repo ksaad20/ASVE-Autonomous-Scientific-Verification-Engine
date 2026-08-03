@@ -77,6 +77,10 @@ class ArtifactScanner:
         return tuple(artifacts)
 
 
+# Backwards-compatible alias used by older tests.
+Scanner = ArtifactScanner
+
 __all__ = [
     "ArtifactScanner",
+    "Scanner",
 ]
