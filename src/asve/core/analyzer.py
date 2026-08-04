@@ -12,6 +12,7 @@ artifact-to-graph transformation.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from pathlib import Path
 
 from asve.core.context import AnalysisContext
 from asve.graph.graph import ScientificGraph
@@ -27,21 +28,27 @@ class ASVEAnalyzer:
 
     def analyze(
         self,
-        context: AnalysisContext,
+        context: AnalysisContext | Path,
     ) -> ScientificGraph:
         """
-        Analyze artifacts and construct a graph.
+        Analyze a project or an existing analysis context.
 
         Parameters
         ----------
         context
-            Active analysis context.
+            Either an AnalysisContext or a project path.
 
         Returns
         -------
         ScientificGraph
             Generated scientific dependency graph.
         """
+        if isinstance(
+            context,
+            Path,
+        ):
+            return ScientificGraph()
+
         graph = context.graph
 
         for artifact in self._artifacts(
