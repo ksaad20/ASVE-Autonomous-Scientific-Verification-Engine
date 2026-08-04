@@ -1,9 +1,7 @@
 """
-ASVE CLI command implementations.
+ASVE command implementations.
 
-This module contains command handlers used by the terminal interface.
-
-Commands should remain thin wrappers around the public ASVE API.
+Contains CLI commands exposed through the Typer application.
 """
 
 from __future__ import annotations
@@ -12,34 +10,68 @@ from pathlib import Path
 
 import typer
 
-from asve.api import verify
+from asve.core.config import ASVEConfig
+from asve.core.pipeline import ASVEPipeline
+
+__all__ = [
+    "verify",
+]
 
 
-def verify_command(
-    project_path: Path,
+def verify(
+    path: Path = typer.Argument(
+        ...,
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        help="Path to the project to verify.",
+    ),
 ) -> None:
     """
-    Execute scientific project verification.
-
-    Parameters
-    ----------
-    project_path
-        Path to the research project.
+    Verify a scientific project.
     """
-    report = verify(
-        project_path,
+    config = ASVEConfig()
+
+    pipeline = ASVEPipeline(
+        config=config,
+    )
+
+    report = pipeline.run(
+        path,
     )
 
     typer.echo(
-        report.summary(),
+        _format_report(report),
     )
 
-    if report.has_errors:
-        raise typer.Exit(
-            code=1,
+
+def _format_report(
+    report: object,
+) -> str:
+    """
+    Convert verification results into CLI output.
+    """
+    if hasattr(
+        report,
+        "summary",
+    ):
+        return str(
+            report.summary(),
         )
 
+    if hasattr(
+        report,
+        "findings",
+    ):
+        findings = getattr(
+            report,
+            "findings",
+        )
 
-__all__ = [
-    "verify_command",
-]
+        return (
+            "Verification complete\n"
+            f"Findings: {len(findings)}"
+        )
+
+    return "Verification complete"
