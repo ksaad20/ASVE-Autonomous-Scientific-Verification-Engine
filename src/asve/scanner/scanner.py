@@ -1,8 +1,7 @@
 """
-Artifact scanning utilities for ASVE.
+ASVE artifact scanner.
 
-The scanner walks project directories and creates artifact objects
-through the configured artifact registry.
+Scans project directories for supported scientific artifacts.
 """
 
 from __future__ import annotations
@@ -20,24 +19,25 @@ class ArtifactScanner:
 
     def __init__(
         self,
-        registry: ArtifactRegistry,
+        registry: ArtifactRegistry | None = None,
     ) -> None:
         """
-        Initialize the artifact scanner.
+        Create a scanner.
 
         Parameters
         ----------
         registry
-            Registry used to create artifacts from discovered files.
+            Optional artifact registry. If omitted, a default registry
+            is created automatically.
         """
-        self.registry = registry
+        self.registry = registry or ArtifactRegistry()
 
     def scan(
         self,
         path: Path,
     ) -> list[Artifact]:
         """
-        Scan a project directory for artifacts.
+        Scan a project directory.
 
         Parameters
         ----------
@@ -47,9 +47,12 @@ class ArtifactScanner:
         Returns
         -------
         list[Artifact]
-            Discovered artifacts in deterministic path order.
+            Discovered artifacts in deterministic order.
         """
-        if not path.exists() or not path.is_dir():
+        if not path.exists():
+            return []
+
+        if not path.is_dir():
             return []
 
         artifacts: list[Artifact] = []
@@ -58,19 +61,26 @@ class ArtifactScanner:
             if not file_path.is_file():
                 continue
 
-            artifact = self.registry.create(file_path)
+            if any(part.startswith(".") for part in file_path.parts):
+                continue
 
-            if artifact is not None:
-                artifacts.append(artifact)
+            create = getattr(
+                self.registry,
+                "create",
+                None,
+            )
+
+            if callable(create):
+                artifact = create(file_path)
+
+                if artifact is not None:
+                    artifacts.append(artifact)
 
         return artifacts
 
 
-class Scanner(ArtifactScanner):
-    """
-    Backward-compatible scanner name.
-    """
-
+# Backwards compatibility
+Scanner = ArtifactScanner
 
 __all__ = [
     "ArtifactScanner",
