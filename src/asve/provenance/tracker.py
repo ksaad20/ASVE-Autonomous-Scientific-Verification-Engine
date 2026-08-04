@@ -27,6 +27,11 @@ class ProvenanceEntry:
     ) -> None:
         """
         Record a provenance event.
+
+        Parameters
+        ----------
+        event
+            Event description.
         """
         self.events.append(event)
 
@@ -60,7 +65,7 @@ class ProvenanceTracker:
         Returns
         -------
         ProvenanceEntry
-            Provenance record.
+            Newly created provenance record.
         """
         self._entry = ProvenanceEntry(
             source=Path(source),
@@ -72,7 +77,12 @@ class ProvenanceTracker:
         event: str,
     ) -> None:
         """
-        Add an event to the current provenance record.
+        Add an event to the active provenance record.
+
+        Parameters
+        ----------
+        event
+            Event description.
 
         Raises
         ------
@@ -85,12 +95,28 @@ class ProvenanceTracker:
 
         self._entry.add_event(event)
 
+    def history(
+        self,
+    ) -> list[str]:
+        """
+        Return the recorded provenance event history.
+
+        Returns
+        -------
+        list[str]
+            Recorded events in insertion order.
+        """
+        if self._entry is None:
+            return []
+
+        return list(self._entry.events)
+
     @property
     def entry(
         self,
     ) -> ProvenanceEntry | None:
         """
-        Return the current provenance record.
+        Return the active provenance record.
         """
         return self._entry
 
@@ -98,7 +124,7 @@ class ProvenanceTracker:
         self,
     ) -> None:
         """
-        Remove the current provenance record.
+        Remove the active provenance record.
         """
         self._entry = None
 
@@ -106,4 +132,4 @@ class ProvenanceTracker:
 __all__ = [
     "ProvenanceEntry",
     "ProvenanceTracker",
-        ]
+]
