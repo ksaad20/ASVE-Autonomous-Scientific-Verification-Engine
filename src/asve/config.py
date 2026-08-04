@@ -1,20 +1,23 @@
 """
 Configuration models for ASVE.
 
-This module defines validated configuration objects used throughout
-the Automated Scientific Verification Engine (ASVE).
+This module defines the configuration schema used throughout the
+Automated Scientific Verification Engine (ASVE).
+
+Configuration objects are immutable, strictly typed, and validated to
+ensure consistent behavior across all ASVE components.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from dataclasses import field
 from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
-from pydantic import ValidationError
 
 from asve.exceptions import ConfigurationError
 
@@ -27,14 +30,19 @@ class ProjectConfig(BaseModel):
         extra="forbid",
     )
 
-    name: str = "Untitled Project"
+    name: str = Field(
+        default="Untitled Project",
+        description="Human-readable project name.",
+    )
+
     root: Path = Field(
         default_factory=Path.cwd,
+        description="Project root directory.",
     )
 
 
 class VerificationConfig(BaseModel):
-    """Verification settings."""
+    """Verification module configuration."""
 
     model_config = ConfigDict(
         frozen=True,
@@ -49,7 +57,7 @@ class VerificationConfig(BaseModel):
 
 
 class ReportingConfig(BaseModel):
-    """Reporting settings."""
+    """Reporting configuration."""
 
     model_config = ConfigDict(
         frozen=True,
@@ -59,11 +67,15 @@ class ReportingConfig(BaseModel):
     markdown: bool = True
     json: bool = True
     html: bool = False
-    output_directory: Path = Path("asve-report")
+
+    output_directory: Path = Field(
+        default=Path("asve-report"),
+        description="Directory where reports are generated.",
+    )
 
 
 class RuntimeConfig(BaseModel):
-    """Runtime settings."""
+    """Runtime execution settings."""
 
     model_config = ConfigDict(
         frozen=True,
@@ -71,9 +83,11 @@ class RuntimeConfig(BaseModel):
     )
 
     parallel: bool = True
+
     workers: int = Field(
         default=4,
         ge=1,
+        description="Number of worker processes.",
     )
 
     profile: Literal[
@@ -88,23 +102,43 @@ class ASVEConfig:
     """
     Top-level ASVE configuration.
 
-    Invalid configuration raises ConfigurationError.
+    Configuration validation is performed during initialization.
     """
 
-    project: ProjectConfig = ProjectConfig()
-    verification: VerificationConfig = VerificationConfig()
-    reporting: ReportingConfig = ReportingConfig()
-    runtime: RuntimeConfig = RuntimeConfig()
+    project: ProjectConfig = field(
+        default_factory=ProjectConfig,
+    )
+
+    verification: VerificationConfig = field(
+        default_factory=VerificationConfig,
+    )
+
+    reporting: ReportingConfig = field(
+        default_factory=ReportingConfig,
+    )
+
+    runtime: RuntimeConfig = field(
+        default_factory=RuntimeConfig,
+    )
+
     strict_mode: bool = False
 
     def __init__(
         self,
-        project: ProjectConfig = ProjectConfig(),
-        verification: VerificationConfig = VerificationConfig(),
-        reporting: ReportingConfig = ReportingConfig(),
-        runtime: RuntimeConfig = RuntimeConfig(),
+        project: ProjectConfig | None = None,
+        verification: VerificationConfig | None = None,
+        reporting: ReportingConfig | None = None,
+        runtime: RuntimeConfig | None = None,
         strict_mode: object = False,
     ) -> None:
+        """
+        Create validated ASVE configuration.
+
+        Raises:
+            ConfigurationError:
+                If configuration values are invalid.
+        """
+
         if not isinstance(strict_mode, bool):
             raise ConfigurationError(
                 "strict_mode must be a boolean value."
@@ -113,25 +147,41 @@ class ASVEConfig:
         object.__setattr__(
             self,
             "project",
-            project,
+            (
+                project
+                if project is not None
+                else ProjectConfig()
+            ),
         )
 
         object.__setattr__(
             self,
             "verification",
-            verification,
+            (
+                verification
+                if verification is not None
+                else VerificationConfig()
+            ),
         )
 
         object.__setattr__(
             self,
             "reporting",
-            reporting,
+            (
+                reporting
+                if reporting is not None
+                else ReportingConfig()
+            ),
         )
 
         object.__setattr__(
             self,
             "runtime",
-            runtime,
+            (
+                runtime
+                if runtime is not None
+                else RuntimeConfig()
+            ),
         )
 
         object.__setattr__(
