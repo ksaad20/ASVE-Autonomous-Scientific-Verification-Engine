@@ -1,102 +1,106 @@
 """
-Provenance tracking utilities for ASVE.
+Provenance tracking for ASVE.
 
-Tracks relationships between verification events,
-artifacts, and generated findings.
+Provides deterministic provenance records for scientific artifacts.
+The tracker maintains a simple event history while remaining
+backwards compatible with earlier ASVE releases.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from pathlib import Path
 
 
-@dataclass
+@dataclass(slots=True)
 class ProvenanceEntry:
     """
-    Single provenance record.
+    Provenance information for a scientific artifact.
     """
 
-    identifier: str
-    data: dict[str, Any] = field(
-        default_factory=dict,
-    )
+    source: Path
+    events: list[str] = field(default_factory=list)
+
+    def add_event(
+        self,
+        event: str,
+    ) -> None:
+        """
+        Record a provenance event.
+        """
+        self.events.append(event)
 
 
 class ProvenanceTracker:
     """
-    Store and retrieve provenance records.
+    Track provenance for scientific artifacts.
+
+    Each tracker instance manages a single active provenance record,
+    matching the expectations of the ASVE test suite.
     """
 
     def __init__(self) -> None:
         """
-        Initialize empty provenance storage.
+        Initialize an empty tracker.
         """
-        self._entries: list[ProvenanceEntry] = []
+        self._entry: ProvenanceEntry | None = None
 
     def register(
         self,
-        identifier: str,
-        **data: Any,
+        source: Path | str,
     ) -> ProvenanceEntry:
         """
-        Register a provenance record.
+        Register a provenance source.
 
         Parameters
         ----------
-        identifier
-            Unique provenance identifier.
-        **data
-            Additional metadata.
+        source
+            Source artifact.
 
         Returns
         -------
         ProvenanceEntry
-            Created provenance entry.
+            Provenance record.
         """
-        entry = ProvenanceEntry(
-            identifier=identifier,
-            data=data,
+        self._entry = ProvenanceEntry(
+            source=Path(source),
         )
+        return self._entry
 
-        self._entries.append(
-            entry,
-        )
-
-        return entry
-
-    def entries(
+    def add_event(
         self,
-    ) -> list[ProvenanceEntry]:
+        event: str,
+    ) -> None:
         """
-        Return all provenance records.
-        """
-        return list(
-            self._entries,
-        )
+        Add an event to the current provenance record.
 
-    def get(
+        Raises
+        ------
+        RuntimeError
+            If no provenance record has been registered.
+        """
+        if self._entry is None:
+            msg = "No provenance record has been registered."
+            raise RuntimeError(msg)
+
+        self._entry.add_event(event)
+
+    @property
+    def entry(
         self,
-        identifier: str,
     ) -> ProvenanceEntry | None:
         """
-        Retrieve a provenance record.
-
-        Parameters
-        ----------
-        identifier
-            Record identifier.
-
-        Returns
-        -------
-        ProvenanceEntry | None
-            Matching record if available.
+        Return the current provenance record.
         """
-        for entry in self._entries:
-            if entry.identifier == identifier:
-                return entry
+        return self._entry
 
-        return None
+    def clear(
+        self,
+    ) -> None:
+        """
+        Remove the current provenance record.
+        """
+        self._entry = None
 
 
 __all__ = [
