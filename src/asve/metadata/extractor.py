@@ -2,45 +2,42 @@
 Metadata extraction utilities.
 
 Provides deterministic metadata extraction for ASVE artifacts and
-filesystem paths. The extractor accepts either an ``Artifact`` instance
-or a path-like object for backwards compatibility with earlier ASVE
-releases and existing test suites.
+filesystem paths.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 from asve.models.artifact import Artifact
+from asve.models.metadata import Metadata
 
 
 class MetadataExtractor:
     """
     Extract deterministic metadata from scientific artifacts.
 
-    The extracted metadata is intentionally lightweight and stable so
-    that repeated extraction of the same artifact always produces the
-    same result.
+    The extractor accepts either an ``Artifact`` instance or a filesystem
+    path. Metadata extraction is deterministic so repeated extraction of
+    the same artifact always produces equivalent metadata.
     """
 
     def extract(
         self,
         artifact: Artifact | Path | str,
-    ) -> dict[str, Any]:
+    ) -> Metadata:
         """
-        Extract metadata from an artifact or filesystem path.
+        Extract metadata from an artifact.
 
         Parameters
         ----------
         artifact
-            Artifact instance, ``pathlib.Path`` object, or string path.
+            Artifact instance or filesystem path.
 
         Returns
         -------
-        dict[str, Any]
-            Dictionary containing deterministic metadata describing the
-            supplied artifact.
+        Metadata
+            Extracted metadata.
         """
         path = (
             Path(artifact.path)
@@ -48,16 +45,23 @@ class MetadataExtractor:
             else Path(artifact)
         )
 
-        return {
-            "filename": path.name,
-            "stem": path.stem,
-            "suffix": path.suffix,
-            "path": str(path),
-            "parent": str(path.parent),
-            "exists": path.exists(),
-            "is_file": path.is_file(),
-            "is_dir": path.is_dir(),
-        }
+        metadata = Metadata(
+            filename=path.name,
+            path=path,
+            stem=path.stem,
+            suffix=path.suffix,
+            parent=path.parent,
+            exists=path.exists(),
+            is_file=path.is_file(),
+            is_dir=path.is_dir(),
+        )
+
+        metadata.add(
+            "absolute_path",
+            path.resolve(),
+        )
+
+        return metadata
 
 
 __all__ = [
