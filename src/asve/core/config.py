@@ -16,6 +16,8 @@ from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
 
+from asve.exceptions import ConfigurationError
+
 
 class ASVEConfig(BaseModel):
     """
@@ -24,6 +26,7 @@ class ASVEConfig(BaseModel):
 
     model_config = ConfigDict(
         extra="forbid",
+        frozen=True,
     )
 
     enabled_parsers: tuple[str, ...] = Field(
@@ -68,12 +71,43 @@ class ASVEConfig(BaseModel):
         ),
     )
 
-    strict_mode: bool = Field(
+    strict_mode: object = Field(
         default=False,
         description=(
             "Enable strict reproducibility checks."
         ),
     )
+
+    @classmethod
+    def model_validate(
+        cls,
+        obj: object,
+        *,
+        strict: bool | None = None,
+        from_attributes: bool | None = None,
+        context: object | None = None,
+    ) -> "ASVEConfig":
+        """
+        Validate configuration with ASVE-specific errors.
+        """
+
+        if isinstance(obj, dict):
+            strict_mode = obj.get(
+                "strict_mode",
+                False,
+            )
+
+            if not isinstance(strict_mode, bool):
+                raise ConfigurationError(
+                    "strict_mode must be a boolean value."
+                )
+
+        return super().model_validate(
+            obj,
+            strict=strict,
+            from_attributes=from_attributes,
+            context=context,
+        )
 
 
 __all__ = [
