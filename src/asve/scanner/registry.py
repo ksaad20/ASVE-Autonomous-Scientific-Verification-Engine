@@ -2,16 +2,17 @@
 Artifact registry.
 
 Maintains an ordered collection of artifact classifiers and constructs
-Artifact objects from filesystem paths.
+Artifact objects from discovered filesystem paths.
 
 The registry preserves backwards compatibility with earlier ASVE
-releases while providing a simple deterministic implementation suitable
-for the current scanner architecture.
+releases while providing a deterministic implementation suitable for
+current and future scanner architectures.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
+from contextlib import suppress
 from pathlib import Path
 
 from asve.models.artifact import Artifact
@@ -22,16 +23,16 @@ Classifier = Callable[[Path], ArtifactPattern]
 
 class ArtifactRegistry:
     """
-    Registry for artifact classifiers.
+    Registry of artifact classifiers.
 
     Classifiers are evaluated in registration order. The first classifier
     returning a value other than ``ArtifactPattern.UNKNOWN`` determines
-    the artifact type.
+    the artifact pattern associated with the supplied path.
     """
 
     def __init__(self) -> None:
         """
-        Create an empty registry.
+        Initialize an empty registry.
         """
         self._classifiers: list[Classifier] = []
 
@@ -48,11 +49,13 @@ class ArtifactRegistry:
             Callable accepting a filesystem path and returning an
             ``ArtifactPattern``.
         """
-        self._classifiers.append(classifier)
+        self._classifiers.append(
+            classifier,
+        )
 
     def clear(self) -> None:
         """
-        Remove all registered classifiers.
+        Remove every registered classifier.
         """
         self._classifiers.clear()
 
@@ -71,11 +74,13 @@ class ArtifactRegistry:
         Returns
         -------
         ArtifactPattern
-            First matching artifact pattern or
+            First matching artifact pattern, otherwise
             ``ArtifactPattern.UNKNOWN``.
         """
         for classifier in self._classifiers:
-            result = classifier(path)
+            result = classifier(
+                path,
+            )
 
             if result != ArtifactPattern.UNKNOWN:
                 return result
@@ -87,36 +92,39 @@ class ArtifactRegistry:
         path: Path,
     ) -> Artifact:
         """
-        Construct an Artifact.
+        Construct an artifact from a filesystem path.
 
         Parameters
         ----------
         path
-            Filesystem path.
+            Path representing a discovered artifact.
 
         Returns
         -------
         Artifact
-            Newly created artifact.
+            Constructed artifact instance.
         """
-        pattern = self.classify(path)
+        pattern = self.classify(
+            path,
+        )
 
         artifact = Artifact(
             path=path,
         )
 
-        # Preserve compatibility with Artifact models that expose a
-        # writable ``pattern`` attribute while remaining safe for models
-        # that do not.
-        if hasattr(artifact, "pattern"):
-            try:
+        if hasattr(
+            artifact,
+            "pattern",
+        ):
+            with suppress(
+                AttributeError,
+                TypeError,
+            ):
                 object.__setattr__(
                     artifact,
                     "pattern",
                     pattern,
                 )
-            except (AttributeError, TypeError):
-                pass
 
         return artifact
 
