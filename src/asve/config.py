@@ -11,13 +11,11 @@ Pydantic to ensure consistent behavior across all ASVE components.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 from typing import Literal
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
-from pydantic import field_validator
 
 from asve.exceptions import ConfigurationError
 
@@ -32,17 +30,15 @@ class ProjectConfig(BaseModel):
 
     name: str = Field(
         default="Untitled Project",
-        description="Human-readable project name.",
     )
 
     root: Path = Field(
         default_factory=Path.cwd,
-        description="Project root directory.",
     )
 
 
 class VerificationConfig(BaseModel):
-    """Verification module configuration."""
+    """Verification settings."""
 
     model_config = ConfigDict(
         frozen=True,
@@ -57,7 +53,7 @@ class VerificationConfig(BaseModel):
 
 
 class ReportingConfig(BaseModel):
-    """Reporting configuration."""
+    """Reporting settings."""
 
     model_config = ConfigDict(
         frozen=True,
@@ -70,7 +66,6 @@ class ReportingConfig(BaseModel):
 
     output_directory: Path = Field(
         default=Path("asve-report"),
-        description="Directory where reports are generated.",
     )
 
 
@@ -87,7 +82,6 @@ class RuntimeConfig(BaseModel):
     workers: int = Field(
         default=4,
         ge=1,
-        description="Number of worker processes.",
     )
 
     profile: Literal[
@@ -100,6 +94,8 @@ class RuntimeConfig(BaseModel):
 class ASVEConfig(BaseModel):
     """
     Top-level ASVE configuration.
+
+    Use ASVEConfig.create() when loading user-provided configuration.
     """
 
     model_config = ConfigDict(
@@ -123,38 +119,31 @@ class ASVEConfig(BaseModel):
         default_factory=RuntimeConfig,
     )
 
-    strict_mode: Any = Field(
-        default=False,
-        description="Enable strict verification behavior.",
-    )
+    strict_mode: bool = False
 
-    @field_validator(
-        "strict_mode",
-        mode="before",
-    )
     @classmethod
-    def validate_strict_mode(
+    def create(
         cls,
-        value: object,
-    ) -> bool:
+        *,
+        strict_mode: object = False,
+        **kwargs: object,
+    ) -> "ASVEConfig":
         """
-        Validate strict mode configuration.
+        Create validated ASVE configuration.
+
+        Raises:
+            ConfigurationError:
+                If configuration values are invalid.
         """
 
-        if isinstance(value, bool):
-            return value
+        if not isinstance(strict_mode, bool):
+            raise ConfigurationError(
+                "strict_mode must be a boolean value."
+            )
 
-        if isinstance(value, str):
-            normalized = value.lower()
-
-            if normalized == "true":
-                return True
-
-            if normalized == "false":
-                return False
-
-        raise ConfigurationError(
-            "strict_mode must be a boolean value."
+        return cls(
+            strict_mode=strict_mode,
+            **kwargs,
         )
 
 
@@ -168,4 +157,4 @@ __all__ = [
     "ReportingConfig",
     "RuntimeConfig",
     "VerificationConfig",
-]
+            ]
