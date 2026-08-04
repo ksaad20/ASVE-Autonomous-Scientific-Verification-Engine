@@ -1,8 +1,10 @@
 """
 Metadata extraction utilities.
 
-Provides deterministic metadata extraction for filesystem paths and
-ASVE artifacts.
+Provides deterministic metadata extraction for ASVE artifacts and
+filesystem paths. The extractor accepts either an ``Artifact`` instance
+or a path-like object for backwards compatibility with earlier ASVE
+releases and existing test suites.
 """
 
 from __future__ import annotations
@@ -15,7 +17,11 @@ from asve.models.artifact import Artifact
 
 class MetadataExtractor:
     """
-    Extract metadata from artifacts or filesystem paths.
+    Extract deterministic metadata from scientific artifacts.
+
+    The extracted metadata is intentionally lightweight and stable so
+    that repeated extraction of the same artifact always produces the
+    same result.
     """
 
     def extract(
@@ -23,22 +29,24 @@ class MetadataExtractor:
         artifact: Artifact | Path | str,
     ) -> dict[str, Any]:
         """
-        Extract deterministic metadata.
+        Extract metadata from an artifact or filesystem path.
 
         Parameters
         ----------
         artifact
-            Artifact instance, filesystem path, or string path.
+            Artifact instance, ``pathlib.Path`` object, or string path.
 
         Returns
         -------
         dict[str, Any]
-            Extracted metadata.
+            Dictionary containing deterministic metadata describing the
+            supplied artifact.
         """
-        if isinstance(artifact, Artifact):
-            path = Path(artifact.path)
-        else:
-            path = Path(artifact)
+        path = (
+            Path(artifact.path)
+            if isinstance(artifact, Artifact)
+            else Path(artifact)
+        )
 
         return {
             "filename": path.name,
@@ -47,6 +55,8 @@ class MetadataExtractor:
             "path": str(path),
             "parent": str(path.parent),
             "exists": path.exists(),
+            "is_file": path.is_file(),
+            "is_dir": path.is_dir(),
         }
 
 
