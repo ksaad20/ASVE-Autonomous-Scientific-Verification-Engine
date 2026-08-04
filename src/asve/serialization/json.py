@@ -1,5 +1,5 @@
 """
-JSON serialization utilities for ASVE.
+JSON serialization utilities.
 """
 
 from __future__ import annotations
@@ -8,11 +8,6 @@ import json
 from typing import Any
 
 from pydantic import BaseModel
-
-__all__ = [
-    "deserialize_json",
-    "serialize_json",
-]
 
 
 def serialize_json(
@@ -23,30 +18,23 @@ def serialize_json(
 ) -> str:
     """
     Serialize an object to JSON.
-
-    Parameters
-    ----------
-    obj
-        Object to serialize.
-    indent
-        Optional indentation level.
-    sort_keys
-        Whether to sort dictionary keys.
-
-    Returns
-    -------
-    str
-        JSON representation.
     """
-
     if isinstance(obj, BaseModel):
-        data = obj.model_dump(mode="json")
+        data = obj.model_dump(
+            mode="json",
+        )
+
     elif hasattr(obj, "model_dump"):
-        data = obj.model_dump(mode="json")
+        try:
+            data = obj.model_dump(
+                mode="json",
+            )
+        except TypeError:
+            data = obj.model_dump()
+
     elif hasattr(obj, "dict"):
         data = obj.dict()
-    elif hasattr(obj, "__dict__"):
-        data = obj.__dict__
+
     else:
         data = obj
 
@@ -54,25 +42,31 @@ def serialize_json(
         data,
         indent=indent,
         sort_keys=sort_keys,
-        ensure_ascii=False,
-        default=str,
     )
 
 
 def deserialize_json(
-    data: str,
-) -> Any:
+    text: str,
+) -> dict[str, Any]:
     """
-    Deserialize JSON into a Python object.
-
-    Parameters
-    ----------
-    data
-        JSON string.
-
-    Returns
-    -------
-    Any
-        Parsed object.
+    Deserialize JSON into a Python dictionary.
     """
-    return json.loads(data)
+    result = json.loads(
+        text,
+    )
+
+    if isinstance(
+        result,
+        dict,
+    ):
+        return result
+
+    raise TypeError(
+        "Expected JSON object.",
+    )
+
+
+__all__ = [
+    "deserialize_json",
+    "serialize_json",
+]
