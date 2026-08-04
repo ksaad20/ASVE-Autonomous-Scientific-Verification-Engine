@@ -1,5 +1,5 @@
 """
-JSON serialization helpers for ASVE models.
+JSON serialization utilities for ASVE.
 """
 
 from __future__ import annotations
@@ -16,69 +16,63 @@ __all__ = [
 
 
 def serialize_json(
-    obj: BaseModel | dict[str, Any],
+    obj: Any,
+    *,
+    indent: int | None = None,
+    sort_keys: bool = True,
 ) -> str:
     """
-    Serialize an ASVE object into deterministic JSON.
+    Serialize an object to JSON.
 
     Parameters
     ----------
     obj
-        Pydantic model or dictionary to serialize.
+        Object to serialize.
+    indent
+        Optional indentation level.
+    sort_keys
+        Whether to sort dictionary keys.
 
     Returns
     -------
     str
         JSON representation.
     """
-    data = (
-        obj.model_dump(
-            mode="json",
-        )
-        if isinstance(
-            obj,
-            BaseModel,
-        )
-        else obj
-    )
+
+    if isinstance(obj, BaseModel):
+        data = obj.model_dump(mode="json")
+    elif hasattr(obj, "model_dump"):
+        data = obj.model_dump(mode="json")
+    elif hasattr(obj, "dict"):
+        data = obj.dict()
+    elif hasattr(obj, "__dict__"):
+        data = obj.__dict__
+    else:
+        data = obj
 
     return json.dumps(
         data,
-        sort_keys=True,
+        indent=indent,
+        sort_keys=sort_keys,
+        ensure_ascii=False,
+        default=str,
     )
 
 
 def deserialize_json(
     data: str,
-) -> dict[str, Any]:
+) -> Any:
     """
-    Deserialize JSON into a dictionary.
+    Deserialize JSON into a Python object.
 
     Parameters
     ----------
     data
-        Serialized JSON string.
+        JSON string.
 
     Returns
     -------
-    dict[str, Any]
-        Deserialized object data.
-
-    Raises
-    ------
-    TypeError
-        If the JSON value is not an object.
+    Any
+        Parsed object.
     """
-    result = json.loads(
-        data,
-    )
-
-    if not isinstance(
-        result,
-        dict,
-    ):
-        raise TypeError(
-            "Serialized JSON must represent an object.",
-        )
-
-    return result
+    return json.loads(data)
