@@ -1,9 +1,9 @@
 """
 ASVE CLI output formatting.
 
-This module converts verification reports into human-readable
-terminal output suitable for interactive terminals, CI systems,
-and future machine-readable exporters.
+This module converts verification reports into clear, deterministic,
+human-readable terminal output suitable for interactive use, CI logs,
+and future export backends.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ def format_report(
     report: VerificationReport,
 ) -> str:
     """
-    Format a verification report for terminal display.
+    Format a verification report for terminal output.
 
     Parameters
     ----------
@@ -27,7 +27,7 @@ def format_report(
     Returns
     -------
     str
-        Multi-line formatted report.
+        Formatted multi-line report.
     """
     lines: list[str] = [
         "ASVE Verification Report",
@@ -57,7 +57,7 @@ def format_report(
             "No severity statistics available.",
         )
 
-    findings = list(
+    findings = tuple(
         getattr(
             report,
             "findings",
@@ -99,24 +99,26 @@ def format_report(
             "No findings.",
         )
 
-    return "\n".join(lines)
+    return "\n".join(
+        lines,
+    )
 
 
 def render_report(
     report: Any,
 ) -> str:
     """
-    Render a verification report for CLI output.
+    Render a verification report for CLI display.
 
     Parameters
     ----------
     report
-        Object representing a verification report.
+        Verification report or compatible object.
 
     Returns
     -------
     str
-        Human-readable report.
+        Human-readable representation of the report.
     """
     if isinstance(
         report,
@@ -132,15 +134,14 @@ def render_report(
         None,
     )
 
-    if callable(summary):
-        try:
-            return (
-                "Summary\n"
-                "-------\n"
-                f"{summary()}"
-            )
-        except Exception:
-            pass
+    if callable(
+        summary,
+    ):
+        return (
+            "Summary\n"
+            "-------\n"
+            f"{summary()}"
+        )
 
     return (
         "Summary\n"
