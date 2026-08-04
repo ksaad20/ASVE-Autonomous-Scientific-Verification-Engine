@@ -6,19 +6,21 @@ Defines the metadata container attached to scientific artifacts.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel
+from pydantic import ConfigDict
+from pydantic import Field
 
 
 class Metadata(BaseModel):
     """
-    Metadata associated with an artifact.
+    Metadata describing a scientific artifact.
 
-    Parameters
-    ----------
-    fields
-        Arbitrary metadata stored as key-value pairs.
+    The model exposes common metadata as attributes while allowing
+    arbitrary additional metadata through the ``fields`` mapping for
+    forward compatibility.
     """
 
     model_config = ConfigDict(
@@ -27,9 +29,49 @@ class Metadata(BaseModel):
         frozen=False,
     )
 
+    filename: str = Field(
+        default="",
+        description="Artifact filename.",
+    )
+
+    path: Path | None = Field(
+        default=None,
+        description="Filesystem path.",
+    )
+
+    stem: str = Field(
+        default="",
+        description="Filename without suffix.",
+    )
+
+    suffix: str = Field(
+        default="",
+        description="Filename extension.",
+    )
+
+    parent: Path | None = Field(
+        default=None,
+        description="Parent directory.",
+    )
+
+    exists: bool = Field(
+        default=False,
+        description="Whether the artifact exists.",
+    )
+
+    is_file: bool = Field(
+        default=False,
+        description="Whether the path is a file.",
+    )
+
+    is_dir: bool = Field(
+        default=False,
+        description="Whether the path is a directory.",
+    )
+
     fields: dict[str, Any] = Field(
         default_factory=dict,
-        description="Arbitrary metadata fields.",
+        description="Additional metadata.",
     )
 
     def add(
@@ -38,9 +80,25 @@ class Metadata(BaseModel):
         value: Any,
     ) -> None:
         """
-        Add or update a metadata entry.
+        Add or replace a metadata value.
         """
         self.fields[key] = value
+
+    def update(
+        self,
+        values: dict[str, Any],
+    ) -> None:
+        """
+        Update metadata values.
+
+        Known model fields are assigned directly. Unknown keys are stored
+        in the additional metadata dictionary.
+        """
+        for key, value in values.items():
+            if key in self.model_fields:
+                setattr(self, key, value)
+            else:
+                self.fields[key] = value
 
     def get(
         self,
@@ -50,26 +108,24 @@ class Metadata(BaseModel):
         """
         Retrieve a metadata value.
         """
-        return self.fields.get(
-            key,
-            default,
-        )
+        if key in self.model_fields:
+            return getattr(self, key)
+
+        return self.fields.get(key, default)
 
     def remove(
         self,
         key: str,
     ) -> None:
         """
-        Remove a metadata entry if it exists.
+        Remove a metadata entry.
         """
-        self.fields.pop(
-            key,
-            None,
-        )
+        if key in self.fields:
+            del self.fields[key]
 
     def clear(self) -> None:
         """
-        Remove all metadata entries.
+        Remove all additional metadata.
         """
         self.fields.clear()
 
@@ -80,19 +136,25 @@ class Metadata(BaseModel):
         """
         Return whether a metadata key exists.
         """
-        return key in self.fields
+        return key in self.model_fields or key in self.fields
 
     def __len__(self) -> int:
         """
-        Return the number of metadata entries.
+        Return the number of stored metadata values.
         """
         return len(self.fields)
 
     def __bool__(self) -> bool:
         """
-        Return True when metadata is not empty.
+        Return whether any metadata is present.
         """
-        return bool(self.fields)
+        return any(
+            (
+                self.filename,
+                self.path,
+                self.fields,
+            ),
+        )
 
 
 __all__ = [
