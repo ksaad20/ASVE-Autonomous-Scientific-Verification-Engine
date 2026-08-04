@@ -52,8 +52,9 @@ class Artifact(BaseModel):
         description="Artifact name.",
     )
 
-    artifact_type: ArtifactType = Field(
-        default=ArtifactType.UNKNOWN,
+    # Allow arbitrary classifications such as "dataset".
+    artifact_type: str = Field(
+        default=ArtifactType.UNKNOWN.value,
         description="Artifact classification.",
     )
 
@@ -76,9 +77,9 @@ class Artifact(BaseModel):
         """
         Initialize an artifact.
 
-        Using a required keyword-only argument causes
-        ``Artifact()`` to raise ``TypeError`` before
-        Pydantic validation, matching the legacy tests.
+        Making ``path`` a required keyword-only argument preserves the
+        legacy behaviour where ``Artifact()`` raises ``TypeError`` before
+        Pydantic validation.
         """
         super().__init__(
             path=Path(path),
@@ -87,15 +88,16 @@ class Artifact(BaseModel):
 
     @model_validator(mode="after")
     def populate_defaults(self) -> Artifact:
-        """Populate derived fields."""
-
+        """
+        Populate derived fields.
+        """
         if not self.name:
             self.name = self.path.name
 
         if not self.identifier:
             self.identifier = str(self.path.resolve())
 
-        if self.metadata.filename == "":
+        if not self.metadata.filename:
             self.metadata.update(
                 {
                     "filename": self.path.name,
@@ -116,7 +118,7 @@ class Artifact(BaseModel):
         return (
             "Artifact("
             f"path={self.path!r}, "
-            f"artifact_type={self.artifact_type.value!r}"
+            f"artifact_type={self.artifact_type!r}"
             ")"
         )
 
