@@ -14,7 +14,7 @@ from asve.scanner.registry import ArtifactRegistry
 
 class ArtifactScanner:
     """
-    Discover artifacts within a project directory.
+    Discover scientific artifacts within a project directory.
     """
 
     def __init__(
@@ -22,40 +22,56 @@ class ArtifactScanner:
         registry: ArtifactRegistry | None = None,
     ) -> None:
         """
-        Create a scanner.
+        Create an artifact scanner.
 
         Parameters
         ----------
         registry
-            Optional artifact registry. If omitted, a default registry
-            is created automatically.
+            Artifact registry used to classify and construct artifacts.
+            If omitted, a default registry is created.
         """
         self.registry = registry or ArtifactRegistry()
 
     def scan(
         self,
-        path: Path,
-    ) -> list[Artifact]:
+        path: str | Path,
+    ) -> list[Artifact] | tuple[()]:
         """
         Scan a project directory.
 
         Parameters
         ----------
         path
-            Directory to scan.
+            Filesystem path to scan.
 
         Returns
         -------
-        list[Artifact]
-            Discovered artifacts in deterministic order.
+        list[Artifact] | tuple[()]
+            Artifacts discovered in deterministic order. Returns an
+            empty tuple for missing or invalid paths for backwards
+            compatibility.
         """
+        path = Path(path)
+
         if not path.exists():
-            return []
+            return ()
 
         if not path.is_dir():
-            return []
+            return ()
 
         artifacts: list[Artifact] = []
+
+        create = getattr(
+            self.registry,
+            "create",
+            None,
+        )
+
+        classify = getattr(
+            self.registry,
+            "classify",
+            None,
+        )
 
         for file_path in sorted(path.rglob("*")):
             if not file_path.is_file():
@@ -64,17 +80,16 @@ class ArtifactScanner:
             if any(part.startswith(".") for part in file_path.parts):
                 continue
 
-            create = getattr(
-                self.registry,
-                "create",
-                None,
-            )
+            artifact: Artifact | None = None
 
             if callable(create):
                 artifact = create(file_path)
 
-                if artifact is not None:
-                    artifacts.append(artifact)
+            elif callable(classify):
+                artifact = classify(file_path)
+
+            if artifact is not None:
+                artifacts.append(artifact)
 
         return artifacts
 
