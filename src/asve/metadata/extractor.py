@@ -1,9 +1,8 @@
 """
 Metadata extraction utilities.
 
-This module provides deterministic metadata extraction for ASVE artifacts.
-Metadata is intentionally lightweight and reproducible so that repeated
-analysis of the same artifact produces identical results.
+Provides deterministic metadata extraction for filesystem paths and
+ASVE artifacts.
 """
 
 from __future__ import annotations
@@ -16,32 +15,30 @@ from asve.models.artifact import Artifact
 
 class MetadataExtractor:
     """
-    Extract metadata from scientific artifacts.
-
-    The extractor produces a dictionary containing basic filesystem
-    information that is independent of parser implementations. Additional
-    metadata sources may be incorporated in future versions without
-    changing the public API.
+    Extract metadata from artifacts or filesystem paths.
     """
 
     def extract(
         self,
-        artifact: Artifact,
+        artifact: Artifact | Path | str,
     ) -> dict[str, Any]:
         """
-        Extract metadata from an artifact.
+        Extract deterministic metadata.
 
         Parameters
         ----------
         artifact
-            Artifact whose metadata should be extracted.
+            Artifact instance, filesystem path, or string path.
 
         Returns
         -------
         dict[str, Any]
-            Deterministic metadata describing the artifact.
+            Extracted metadata.
         """
-        path = Path(artifact.path)
+        if isinstance(artifact, Artifact):
+            path = Path(artifact.path)
+        else:
+            path = Path(artifact)
 
         return {
             "filename": path.name,
