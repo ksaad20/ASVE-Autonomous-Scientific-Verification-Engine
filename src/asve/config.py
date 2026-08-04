@@ -16,6 +16,9 @@ from typing import Literal
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
+from pydantic import ValidationError
+
+from asve.exceptions import ConfigurationError
 
 
 class ProjectConfig(BaseModel):
@@ -32,7 +35,7 @@ class ProjectConfig(BaseModel):
     )
 
     root: Path = Field(
-        default=Path.cwd(),
+        default_factory=Path.cwd,
         description="Project root directory.",
     )
 
@@ -66,6 +69,7 @@ class ReportingConfig(BaseModel):
 
     output_directory: Path = Field(
         default=Path("asve-report"),
+        description="Directory where reports are generated.",
     )
 
 
@@ -78,7 +82,12 @@ class RuntimeConfig(BaseModel):
     )
 
     parallel: bool = True
-    workers: int = 4
+
+    workers: int = Field(
+        default=4,
+        ge=1,
+        description="Number of worker processes.",
+    )
 
     profile: Literal[
         "minimal",
@@ -97,28 +106,47 @@ class ASVEConfig(BaseModel):
         extra="forbid",
     )
 
-    project: ProjectConfig = ProjectConfig()
-
-    verification: VerificationConfig = (
-        VerificationConfig()
+    project: ProjectConfig = Field(
+        default_factory=ProjectConfig,
     )
 
-    reporting: ReportingConfig = (
-        ReportingConfig()
+    verification: VerificationConfig = Field(
+        default_factory=VerificationConfig,
     )
 
-    runtime: RuntimeConfig = (
-        RuntimeConfig()
+    reporting: ReportingConfig = Field(
+        default_factory=ReportingConfig,
     )
+
+    runtime: RuntimeConfig = Field(
+        default_factory=RuntimeConfig,
+    )
+
+    strict_mode: bool = Field(
+        default=False,
+        description="Enable strict verification behavior.",
+    )
+
+    def __init__(self, **data: object) -> None:
+        """
+        Validate configuration and normalize errors.
+        """
+        try:
+            super().__init__(**data)
+        except ValidationError as exc:
+            raise ConfigurationError(
+                f"Invalid ASVE configuration: {exc}"
+            ) from exc
 
 
 DEFAULT_CONFIG = ASVEConfig()
 
+
 __all__ = [
-    "ProjectConfig",
-    "VerificationConfig",
-    "ReportingConfig",
-    "RuntimeConfig",
     "ASVEConfig",
     "DEFAULT_CONFIG",
+    "ProjectConfig",
+    "ReportingConfig",
+    "RuntimeConfig",
+    "VerificationConfig",
 ]
