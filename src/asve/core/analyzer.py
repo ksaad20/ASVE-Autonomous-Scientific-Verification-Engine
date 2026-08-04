@@ -73,13 +73,22 @@ class ASVEAnalyzer:
         """
         Process a single artifact.
 
-        Parser, extractor, and graph builder integrations are added
-        here through dependency injection in future versions.
+        Parser, extractor, and graph builder integrations will be
+        added here through dependency injection in future versions.
         """
         _ = artifact
         _ = graph
 
 
+class Analyzer(ASVEAnalyzer):
+    """
+    Backward-compatible alias for ASVEAnalyzer.
+
+    Existing code and tests import ``Analyzer``.
+    """
+
+
 __all__ = [
+    "Analyzer",
     "ASVEAnalyzer",
 ]
