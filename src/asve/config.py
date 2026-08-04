@@ -16,9 +16,49 @@ from typing import Literal
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
-from pydantic import model_validator
+from pydantic_core import core_schema
 
 from asve.exceptions import ConfigurationError
+
+
+class StrictBool:
+    """
+    Strict boolean configuration type.
+
+    Converts valid boolean values while raising ASVE-specific
+    configuration errors for invalid input.
+    """
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        source_type: object,
+        handler: object,
+    ) -> core_schema.CoreSchema:
+        """
+        Define Pydantic validation schema.
+        """
+
+        def validate(value: object) -> bool:
+            if isinstance(value, bool):
+                return value
+
+            if isinstance(value, str):
+                normalized = value.lower()
+
+                if normalized == "true":
+                    return True
+
+                if normalized == "false":
+                    return False
+
+            raise ConfigurationError(
+                "strict_mode must be a boolean value."
+            )
+
+        return core_schema.no_info_plain_validator_function(
+            validate,
+        )
 
 
 class ProjectConfig(BaseModel):
@@ -122,35 +162,10 @@ class ASVEConfig(BaseModel):
         default_factory=RuntimeConfig,
     )
 
-    strict_mode: bool = Field(
+    strict_mode: StrictBool = Field(
         default=False,
         description="Enable strict verification behavior.",
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_configuration(
-        cls,
-        values: object,
-    ) -> object:
-        """
-        Validate raw configuration input.
-
-        Converts invalid configuration values into ASVE-specific errors.
-        """
-
-        if isinstance(values, dict):
-            strict_mode = values.get("strict_mode")
-
-            if isinstance(strict_mode, str) and strict_mode.lower() not in {
-                "true",
-                "false",
-            }:
-                raise ConfigurationError(
-                    "strict_mode must be a boolean value."
-                )
-
-        return values
 
 
 DEFAULT_CONFIG = ASVEConfig()
@@ -162,5 +177,6 @@ __all__ = [
     "ProjectConfig",
     "ReportingConfig",
     "RuntimeConfig",
+    "StrictBool",
     "VerificationConfig",
 ]
