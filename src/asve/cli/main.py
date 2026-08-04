@@ -1,7 +1,8 @@
 """
 ASVE command-line interface.
 
-Built on Typer for type-safe argument parsing and help generation.
+Built on Typer for type-safe argument parsing, validation,
+and help generation.
 """
 
 from __future__ import annotations
@@ -13,9 +14,13 @@ import typer
 
 from asve.api import verify
 
+APP_NAME = "ASVE"
+APP_DESCRIPTION = "ASVE - Autonomous Scientific Verification Engine"
+VERSION = "0.1.0"
+
 app = typer.Typer(
-    name="asve",
-    help="Autonomous Scientific Verification Engine",
+    name=APP_NAME,
+    help=APP_DESCRIPTION,
     add_completion=False,
 )
 
@@ -23,10 +28,17 @@ app = typer.Typer(
 def _version_callback(value: bool) -> None:
     """
     Print the program version and exit.
+
+    Parameters
+    ----------
+    value
+        Whether the version flag was supplied.
     """
-    if value:
-        typer.echo("ASVE 0.1.0")
-        raise typer.Exit()
+    if not value:
+        return
+
+    typer.echo(f"{APP_NAME} {VERSION}")
+    raise typer.Exit()
 
 
 @app.callback()
@@ -36,14 +48,16 @@ def main(
         typer.Option(
             "--version",
             "-v",
-            help="Show version information and exit.",
             callback=_version_callback,
+            help="Show version information and exit.",
             is_eager=True,
         ),
     ] = False,
 ) -> None:
     """
     Autonomous Scientific Verification Engine.
+
+    This callback initializes the ASVE command-line interface.
     """
     del version
 
@@ -63,8 +77,15 @@ def verify_command(
     ],
 ) -> None:
     """
-    Analyze a scientific project.
+    Verify a scientific project.
     """
+    if not project_path.exists():
+        typer.echo(
+            f"Error: '{project_path}' does not exist.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
     verify(project_path)
     typer.echo("Verification complete.")
 
