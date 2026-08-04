@@ -1,26 +1,21 @@
 """
-Project artifact scanner.
+Artifact scanning utilities for ASVE.
 
-The scanner discovers files inside a project directory and converts
-them into ASVE artifact representations.
+The scanner walks project directories and creates artifact objects
+through the configured artifact registry.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable
 
 from asve.models.artifact import Artifact
 from asve.scanner.registry import ArtifactRegistry
 
-__all__ = [
-    "Scanner",
-]
 
-
-class Scanner:
+class ArtifactScanner:
     """
-    Scan project directories for artifacts.
+    Discover artifacts within a project directory.
     """
 
     def __init__(
@@ -28,7 +23,12 @@ class Scanner:
         registry: ArtifactRegistry,
     ) -> None:
         """
-        Initialize scanner with an artifact registry.
+        Initialize the artifact scanner.
+
+        Parameters
+        ----------
+        registry
+            Registry used to create artifacts from discovered files.
         """
         self.registry = registry
 
@@ -37,34 +37,42 @@ class Scanner:
         path: Path,
     ) -> list[Artifact]:
         """
-        Scan a directory and return discovered artifacts.
+        Scan a project directory for artifacts.
 
-        Empty directories return an empty list.
+        Parameters
+        ----------
+        path
+            Directory to scan.
+
+        Returns
+        -------
+        list[Artifact]
+            Discovered artifacts in deterministic path order.
         """
         if not path.exists() or not path.is_dir():
             return []
 
         artifacts: list[Artifact] = []
 
-        for file_path in self._iter_files(path):
-            artifact = self.registry.create(
-                file_path,
-            )
+        for file_path in sorted(path.rglob("*")):
+            if not file_path.is_file():
+                continue
+
+            artifact = self.registry.create(file_path)
 
             if artifact is not None:
-                artifacts.append(
-                    artifact,
-                )
+                artifacts.append(artifact)
 
         return artifacts
 
-    def _iter_files(
-        self,
-        path: Path,
-    ) -> Iterable[Path]:
-        """
-        Yield files eligible for scanning.
-        """
-        for item in sorted(path.rglob("*")):
-            if item.is_file():
-                yield item
+
+class Scanner(ArtifactScanner):
+    """
+    Backward-compatible scanner name.
+    """
+
+
+__all__ = [
+    "ArtifactScanner",
+    "Scanner",
+]
