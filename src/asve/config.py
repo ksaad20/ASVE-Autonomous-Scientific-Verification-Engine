@@ -17,7 +17,7 @@ from typing import Literal
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
-from pydantic import ValidationError
+from pydantic import field_validator
 
 from asve.exceptions import ConfigurationError
 
@@ -123,37 +123,39 @@ class ASVEConfig(BaseModel):
         default_factory=RuntimeConfig,
     )
 
-    strict_mode: bool = Field(
+    strict_mode: Any = Field(
         default=False,
         description="Enable strict verification behavior.",
     )
 
-    def __init__(self, **data: Any) -> None:
+    @field_validator(
+        "strict_mode",
+        mode="before",
+    )
+    @classmethod
+    def validate_strict_mode(
+        cls,
+        value: object,
+    ) -> bool:
         """
-        Validate configuration and expose ASVE-specific errors.
+        Validate strict mode configuration.
         """
 
-        strict_mode = data.get("strict_mode")
+        if isinstance(value, bool):
+            return value
 
-        if isinstance(strict_mode, str):
-            if strict_mode.lower() == "true":
-                data["strict_mode"] = True
+        if isinstance(value, str):
+            normalized = value.lower()
 
-            elif strict_mode.lower() == "false":
-                data["strict_mode"] = False
+            if normalized == "true":
+                return True
 
-            else:
-                raise ConfigurationError(
-                    "strict_mode must be a boolean value."
-                )
+            if normalized == "false":
+                return False
 
-        try:
-            super().__init__(**data)
-
-        except ValidationError as exc:
-            raise ConfigurationError(
-                f"Invalid ASVE configuration: {exc}"
-            ) from exc
+        raise ConfigurationError(
+            "strict_mode must be a boolean value."
+        )
 
 
 DEFAULT_CONFIG = ASVEConfig()
