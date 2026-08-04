@@ -1,93 +1,47 @@
 """
-ASVE scanner registry.
+Artifact registry.
 
-This module manages artifact classification handlers used by the
-scanner subsystem.
-
-The registry provides an extension point for future plugins.
+Creates Artifact objects from discovered filesystem paths.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from pathlib import Path
 
-from asve.scanner.patterns import ArtifactPattern
-from asve.scanner.patterns import classify_path
-
-
-Classifier = Callable[
-    [Path],
-    ArtifactPattern,
-]
+from asve.models.artifact import Artifact
 
 
 class ArtifactRegistry:
     """
-    Registry for artifact classification handlers.
+    Registry responsible for constructing artifacts.
+
+    Future versions may dispatch to specialized artifact factories,
+    but the current implementation provides deterministic Artifact
+    creation for every discovered file.
     """
 
-    def __init__(self) -> None:
-        self._classifiers: list[Classifier] = []
-
-    def register(
-        self,
-        classifier: Classifier,
-    ) -> None:
-        """
-        Register a classifier.
-
-        Parameters
-        ----------
-        classifier
-            Artifact classification function.
-        """
-        self._classifiers.append(classifier)
-
-    def classify(
+    def create(
         self,
         path: Path,
-    ) -> ArtifactPattern:
+    ) -> Artifact:
         """
-        Classify an artifact path.
+        Create an Artifact from a filesystem path.
 
         Parameters
         ----------
         path
-            Artifact path.
+            File to represent.
 
         Returns
         -------
-        ArtifactPattern
-            Detected artifact type.
+        Artifact
+            Newly created artifact.
         """
-        for classifier in self._classifiers:
-            result = classifier(path)
-
-            if result != ArtifactPattern.UNKNOWN:
-                return result
-
-        return ArtifactPattern.UNKNOWN
-
-    def clear(self) -> None:
-        """
-        Remove registered classifiers.
-        """
-        self._classifiers.clear()
-
-    def __len__(self) -> int:
-        """
-        Return number of classifiers.
-        """
-        return len(self._classifiers)
-
-
-registry = ArtifactRegistry()
-
-registry.register(classify_path)
+        return Artifact(
+            path=path,
+        )
 
 
 __all__ = [
     "ArtifactRegistry",
-    "registry",
 ]
