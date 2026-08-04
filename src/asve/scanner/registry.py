@@ -3,15 +3,11 @@ Artifact registry.
 
 Maintains an ordered collection of artifact classifiers and constructs
 Artifact objects from discovered filesystem paths.
-
-The registry preserves backwards compatibility with earlier ASVE
-releases while providing a deterministic implementation suitable for
-current and future scanner architectures.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from contextlib import suppress
 from pathlib import Path
 
@@ -27,7 +23,7 @@ class ArtifactRegistry:
 
     Classifiers are evaluated in registration order. The first classifier
     returning a value other than ``ArtifactPattern.UNKNOWN`` determines
-    the artifact pattern associated with the supplied path.
+    the artifact type assigned to the artifact.
     """
 
     def __init__(self) -> None:
@@ -46,16 +42,13 @@ class ArtifactRegistry:
         Parameters
         ----------
         classifier
-            Callable accepting a filesystem path and returning an
-            ``ArtifactPattern``.
+            Callable accepting a path and returning an artifact pattern.
         """
-        self._classifiers.append(
-            classifier,
-        )
+        self._classifiers.append(classifier)
 
     def clear(self) -> None:
         """
-        Remove every registered classifier.
+        Remove all registered classifiers.
         """
         self._classifiers.clear()
 
@@ -64,25 +57,22 @@ class ArtifactRegistry:
         path: Path,
     ) -> ArtifactPattern:
         """
-        Classify a filesystem path.
+        Determine the artifact pattern for a path.
 
         Parameters
         ----------
         path
-            Path to classify.
+            Filesystem path.
 
         Returns
         -------
         ArtifactPattern
-            First matching artifact pattern, otherwise
-            ``ArtifactPattern.UNKNOWN``.
+            Matching artifact pattern.
         """
         for classifier in self._classifiers:
-            result = classifier(
-                path,
-            )
+            result = classifier(path)
 
-            if result != ArtifactPattern.UNKNOWN:
+            if result is not ArtifactPattern.UNKNOWN:
                 return result
 
         return ArtifactPattern.UNKNOWN
@@ -92,30 +82,25 @@ class ArtifactRegistry:
         path: Path,
     ) -> Artifact:
         """
-        Construct an artifact from a filesystem path.
+        Create an artifact from a filesystem path.
 
         Parameters
         ----------
         path
-            Path representing a discovered artifact.
+            Artifact path.
 
         Returns
         -------
         Artifact
-            Constructed artifact instance.
+            Constructed artifact.
         """
-        pattern = self.classify(
-            path,
-        )
+        pattern = self.classify(path)
 
         artifact = Artifact(
             path=path,
         )
 
-        if hasattr(
-            artifact,
-            "pattern",
-        ):
+        if hasattr(artifact, "pattern"):
             with suppress(
                 AttributeError,
                 TypeError,
@@ -127,6 +112,42 @@ class ArtifactRegistry:
                 )
 
         return artifact
+
+    def __len__(self) -> int:
+        """
+        Return the number of registered classifiers.
+        """
+        return len(self._classifiers)
+
+    def __iter__(self) -> Iterator[Classifier]:
+        """
+        Iterate over registered classifiers.
+        """
+        return iter(self._classifiers)
+
+    def __contains__(
+        self,
+        classifier: object,
+    ) -> bool:
+        """
+        Return whether a classifier is registered.
+        """
+        return classifier in self._classifiers
+
+    def __bool__(self) -> bool:
+        """
+        Return whether the registry contains classifiers.
+        """
+        return bool(self._classifiers)
+
+    def __repr__(self) -> str:
+        """
+        Return a developer-friendly representation.
+        """
+        return (
+            f"{self.__class__.__name__}"
+            f"(classifiers={len(self)})"
+        )
 
 
 __all__ = [
