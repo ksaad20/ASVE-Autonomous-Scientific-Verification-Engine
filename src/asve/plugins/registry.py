@@ -7,7 +7,8 @@ for the ASVE plugin system.
 
 from __future__ import annotations
 
-from typing import Dict, Iterable, Optional
+from collections.abc import Iterable
+from typing import Optional
 
 from asve.plugins.base import Plugin
 
@@ -25,7 +26,7 @@ class PluginRegistry:
         """
         Initialize an empty plugin registry.
         """
-        self._plugins: Dict[str, Plugin] = {}
+        self._plugins: dict[str, Plugin] = {}
 
     def register(
         self,
@@ -45,7 +46,10 @@ class PluginRegistry:
         """
         Remove a plugin from the registry.
 
-        Returns True if a plugin was removed.
+        Returns
+        -------
+        bool
+            True if a plugin was removed, otherwise False.
         """
         if name in self._plugins:
             del self._plugins[name]
@@ -60,15 +64,37 @@ class PluginRegistry:
         """
         Retrieve a plugin by name.
 
-        Returns None if the plugin is not registered.
+        Parameters
+        ----------
+        name
+            Name of the plugin.
+
+        Returns
+        -------
+        Plugin | None
+            The registered plugin if found, otherwise ``None``.
         """
         return self._plugins.get(name)
+
+    def list(self) -> tuple[Plugin, ...]:
+        """
+        Return all registered plugins.
+
+        Returns
+        -------
+        tuple[Plugin, ...]
+            An immutable snapshot of the currently registered plugins.
+        """
+        return tuple(self._plugins.values())
 
     def list_plugins(self) -> Iterable[Plugin]:
         """
         Return all registered plugins.
+
+        This method is retained for backwards compatibility.
+        Prefer :meth:`list` for new code.
         """
-        return tuple(self._plugins.values())
+        return self.list()
 
     def clear(self) -> None:
         """
