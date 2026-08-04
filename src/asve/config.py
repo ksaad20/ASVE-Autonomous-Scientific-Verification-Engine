@@ -11,54 +11,15 @@ Pydantic to ensure consistent behavior across all ASVE components.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 from typing import Literal
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
-from pydantic_core import core_schema
+from pydantic import ValidationError
 
 from asve.exceptions import ConfigurationError
-
-
-class StrictBool:
-    """
-    Strict boolean configuration type.
-
-    Converts valid boolean values while raising ASVE-specific
-    configuration errors for invalid input.
-    """
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls,
-        source_type: object,
-        handler: object,
-    ) -> core_schema.CoreSchema:
-        """
-        Define Pydantic validation schema.
-        """
-
-        def validate(value: object) -> bool:
-            if isinstance(value, bool):
-                return value
-
-            if isinstance(value, str):
-                normalized = value.lower()
-
-                if normalized == "true":
-                    return True
-
-                if normalized == "false":
-                    return False
-
-            raise ConfigurationError(
-                "strict_mode must be a boolean value."
-            )
-
-        return core_schema.no_info_plain_validator_function(
-            validate,
-        )
 
 
 class ProjectConfig(BaseModel):
@@ -162,10 +123,37 @@ class ASVEConfig(BaseModel):
         default_factory=RuntimeConfig,
     )
 
-    strict_mode: StrictBool = Field(
+    strict_mode: bool = Field(
         default=False,
         description="Enable strict verification behavior.",
     )
+
+    def __init__(self, **data: Any) -> None:
+        """
+        Validate configuration and expose ASVE-specific errors.
+        """
+
+        strict_mode = data.get("strict_mode")
+
+        if isinstance(strict_mode, str):
+            if strict_mode.lower() == "true":
+                data["strict_mode"] = True
+
+            elif strict_mode.lower() == "false":
+                data["strict_mode"] = False
+
+            else:
+                raise ConfigurationError(
+                    "strict_mode must be a boolean value."
+                )
+
+        try:
+            super().__init__(**data)
+
+        except ValidationError as exc:
+            raise ConfigurationError(
+                f"Invalid ASVE configuration: {exc}"
+            ) from exc
 
 
 DEFAULT_CONFIG = ASVEConfig()
@@ -177,6 +165,5 @@ __all__ = [
     "ProjectConfig",
     "ReportingConfig",
     "RuntimeConfig",
-    "StrictBool",
     "VerificationConfig",
 ]
