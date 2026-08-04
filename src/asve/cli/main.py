@@ -1,4 +1,5 @@
-"""ASVE command-line interface.
+"""
+ASVE command-line interface.
 
 Built on Typer for type-safe argument parsing and help generation.
 """
@@ -13,26 +14,16 @@ import typer
 from asve.api import verify
 
 app = typer.Typer(
-    name="ASVE",
+    name="asve",
     help="Autonomous Scientific Verification Engine",
+    add_completion=False,
 )
 
 
-@app.command("verify-project")
-def verify_project(
-    project_path: Annotated[
-        Path,
-        typer.Argument(
-            help="Path to the scientific project directory.",
-        ),
-    ],
-) -> None:
-    """Analyze a scientific project for reproducibility issues."""
-    verify(project_path)
-    typer.echo("Verification complete.")
-
-
 def _version_callback(value: bool) -> None:
+    """
+    Print the program version and exit.
+    """
     if value:
         typer.echo("ASVE 0.1.0")
         raise typer.Exit()
@@ -45,13 +36,60 @@ def main(
         typer.Option(
             "--version",
             "-v",
-            help="Show version and exit.",
-            is_eager=True,
+            help="Show version information and exit.",
             callback=_version_callback,
+            is_eager=True,
         ),
     ] = False,
 ) -> None:
-    """Autonomous Scientific Verification Engine."""
+    """
+    Autonomous Scientific Verification Engine.
+    """
+    del version
+
+
+@app.command("verify")
+def verify_command(
+    project_path: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to the scientific project directory.",
+            exists=False,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            resolve_path=False,
+        ),
+    ],
+) -> None:
+    """
+    Analyze a scientific project.
+    """
+    verify(project_path)
+    typer.echo("Verification complete.")
+
+
+@app.command(
+    "verify-project",
+    hidden=True,
+)
+def verify_project(
+    project_path: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to the scientific project directory.",
+            exists=False,
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            resolve_path=False,
+        ),
+    ],
+) -> None:
+    """
+    Backwards-compatible alias for ``verify``.
+    """
+    verify_command(project_path)
 
 
 if __name__ == "__main__":
