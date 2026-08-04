@@ -94,8 +94,10 @@ class Metadata(BaseModel):
         Known model fields are assigned directly. Unknown keys are stored
         in the additional metadata dictionary.
         """
+        model_fields = type(self).model_fields
+
         for key, value in values.items():
-            if key in self.model_fields:
+            if key in model_fields:
                 setattr(self, key, value)
             else:
                 self.fields[key] = value
@@ -108,10 +110,15 @@ class Metadata(BaseModel):
         """
         Retrieve a metadata value.
         """
-        if key in self.model_fields:
+        model_fields = type(self).model_fields
+
+        if key in model_fields:
             return getattr(self, key)
 
-        return self.fields.get(key, default)
+        return self.fields.get(
+            key,
+            default,
+        )
 
     def remove(
         self,
@@ -120,8 +127,10 @@ class Metadata(BaseModel):
         """
         Remove a metadata entry.
         """
-        if key in self.fields:
-            del self.fields[key]
+        self.fields.pop(
+            key,
+            None,
+        )
 
     def clear(self) -> None:
         """
@@ -136,49 +145,29 @@ class Metadata(BaseModel):
         """
         Return whether a metadata key exists.
         """
-        return key in self.model_fields or key in self.fields
+        model_fields = type(self).model_fields
+
+        return key in model_fields or key in self.fields
 
     def __len__(self) -> int:
         """
-        Return the number of stored metadata values.
+        Return the number of additional metadata entries.
         """
         return len(self.fields)
 
     def __bool__(self) -> bool:
         """
-        Return whether any metadata is present.
+        Return whether any metadata has been recorded.
         """
         return any(
             (
-                self.filename,
-                self.path,
-                self.fields,
+                bool(self.filename),
+                self.path is not None,
+                bool(self.fields),
             ),
-
-            path = (
-            Path(artifact.path)
-            if isinstance(artifact, Artifact)
-            else Path(artifact)
-        )
-
-        metadata = Metadata(
-            filename=path.name,
-            path=path,
-        )
-
-        metadata.update(
-            {
-                "stem": path.stem,
-                "suffix": path.suffix,
-                "parent": path.parent,
-                "absolute_path": path.resolve(),
-                "exists": path.exists(),
-                "is_file": path.is_file(),
-                "is_dir": path.is_dir(),
-            },
         )
 
 
 __all__ = [
     "Metadata",
-]
+    ]
