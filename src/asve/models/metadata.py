@@ -154,6 +154,28 @@ class Metadata(BaseModel):
                 self.path,
                 self.fields,
             ),
+
+            path = (
+            Path(artifact.path)
+            if isinstance(artifact, Artifact)
+            else Path(artifact)
+        )
+
+        metadata = Metadata(
+            filename=path.name,
+            path=path,
+        )
+
+        metadata.update(
+            {
+                "stem": path.stem,
+                "suffix": path.suffix,
+                "parent": path.parent,
+                "absolute_path": path.resolve(),
+                "exists": path.exists(),
+                "is_file": path.is_file(),
+                "is_dir": path.is_dir(),
+            },
         )
 
 
