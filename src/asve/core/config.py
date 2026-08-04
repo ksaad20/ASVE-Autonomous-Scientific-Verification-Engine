@@ -15,6 +15,7 @@ from __future__ import annotations
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Field
+from pydantic import model_validator
 
 from asve.exceptions import ConfigurationError
 
@@ -71,28 +72,25 @@ class ASVEConfig(BaseModel):
         ),
     )
 
-    strict_mode: object = Field(
+    strict_mode: bool = Field(
         default=False,
         description=(
             "Enable strict reproducibility checks."
         ),
     )
 
+    @model_validator(mode="before")
     @classmethod
-    def model_validate(
+    def validate_strict_mode(
         cls,
-        obj: object,
-        *,
-        strict: bool | None = None,
-        from_attributes: bool | None = None,
-        context: object | None = None,
-    ) -> "ASVEConfig":
+        values: object,
+    ) -> object:
         """
-        Validate configuration with ASVE-specific errors.
+        Validate strict mode before Pydantic coercion.
         """
 
-        if isinstance(obj, dict):
-            strict_mode = obj.get(
+        if isinstance(values, dict):
+            strict_mode = values.get(
                 "strict_mode",
                 False,
             )
@@ -102,12 +100,7 @@ class ASVEConfig(BaseModel):
                     "strict_mode must be a boolean value."
                 )
 
-        return super().model_validate(
-            obj,
-            strict=strict,
-            from_attributes=from_attributes,
-            context=context,
-        )
+        return values
 
 
 __all__ = [
