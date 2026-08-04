@@ -1,7 +1,5 @@
 """
-ASVE command implementations.
-
-Contains CLI commands exposed through the Typer application.
+ASVE CLI command implementations.
 """
 
 from __future__ import annotations
@@ -17,16 +15,18 @@ __all__ = [
     "verify",
 ]
 
+VERIFY_PATH_ARGUMENT = typer.Argument(
+    ...,
+    exists=True,
+    file_okay=False,
+    dir_okay=True,
+    readable=True,
+    help="Path to the project to verify.",
+)
+
 
 def verify(
-    path: Path = typer.Argument(
-        ...,
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        readable=True,
-        help="Path to the project to verify.",
-    ),
+    path: Path = VERIFY_PATH_ARGUMENT,
 ) -> None:
     """
     Verify a scientific project.
@@ -42,7 +42,9 @@ def verify(
     )
 
     typer.echo(
-        _format_report(report),
+        _format_report(
+            report,
+        ),
     )
 
 
@@ -50,25 +52,30 @@ def _format_report(
     report: object,
 ) -> str:
     """
-    Convert verification results into CLI output.
+    Format a verification report for terminal output.
     """
     if hasattr(
         report,
         "summary",
     ):
+        summary = report.summary()
+
+        if callable(summary):
+            return str(
+                summary(),
+            )
+
         return str(
-            report.summary(),
+            summary,
         )
 
-    if hasattr(
+    findings = getattr(
         report,
         "findings",
-    ):
-        findings = getattr(
-            report,
-            "findings",
-        )
+        None,
+    )
 
+    if findings is not None:
         return (
             "Verification complete\n"
             f"Findings: {len(findings)}"
