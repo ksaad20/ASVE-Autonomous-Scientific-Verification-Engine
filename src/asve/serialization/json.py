@@ -1,8 +1,5 @@
 """
-JSON serialization utilities for ASVE models.
-
-Provides deterministic JSON serialization and deserialization
-compatible with ASVE persistence requirements.
+JSON serialization helpers for ASVE models.
 """
 
 from __future__ import annotations
@@ -11,6 +8,11 @@ import json
 from typing import Any
 
 from pydantic import BaseModel
+
+__all__ = [
+    "deserialize_json",
+    "serialize_json",
+]
 
 
 def serialize_json(
@@ -22,45 +24,53 @@ def serialize_json(
     Parameters
     ----------
     obj
-        Pydantic model or dictionary.
+        Pydantic model or dictionary to serialize.
 
     Returns
     -------
     str
         JSON representation.
     """
-    if isinstance(obj, BaseModel):
-        data = obj.model_dump(
+    data = (
+        obj.model_dump(
             mode="json",
         )
-    else:
-        data = obj
+        if isinstance(
+            obj,
+            BaseModel,
+        )
+        else obj
+    )
 
     return json.dumps(
         data,
         sort_keys=True,
-        indent=2,
     )
 
 
 def deserialize_json(
-    value: str,
+    data: str,
 ) -> dict[str, Any]:
     """
     Deserialize JSON into a dictionary.
 
     Parameters
     ----------
-    value
+    data
         Serialized JSON string.
 
     Returns
     -------
     dict[str, Any]
-        Restored object data.
+        Deserialized object data.
+
+    Raises
+    ------
+    TypeError
+        If the JSON value is not an object.
     """
     result = json.loads(
-        value,
+        data,
     )
 
     if not isinstance(
@@ -72,9 +82,3 @@ def deserialize_json(
         )
 
     return result
-
-
-__all__ = [
-    "serialize_json",
-    "deserialize_json",
-]
