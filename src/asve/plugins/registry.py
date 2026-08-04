@@ -8,7 +8,6 @@ for the ASVE plugin system.
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Optional
 
 from asve.plugins.base import Plugin
 
@@ -49,52 +48,51 @@ class PluginRegistry:
         Returns
         -------
         bool
-            True if a plugin was removed, otherwise False.
+            True if the plugin existed and was removed,
+            otherwise False.
         """
-        if name in self._plugins:
-            del self._plugins[name]
-            return True
-
-        return False
+        return self._plugins.pop(name, None) is not None
 
     def get(
         self,
         name: str,
-    ) -> Optional[Plugin]:
+    ) -> Plugin | None:
         """
         Retrieve a plugin by name.
 
         Parameters
         ----------
         name
-            Name of the plugin.
+            Plugin name.
 
         Returns
         -------
         Plugin | None
-            The registered plugin if found, otherwise ``None``.
+            Registered plugin if found.
         """
         return self._plugins.get(name)
 
-    def list(self) -> tuple[Plugin, ...]:
+    def list(self) -> tuple[str, ...]:
         """
-        Return all registered plugins.
+        Return the names of all registered plugins.
+
+        Returns
+        -------
+        tuple[str, ...]
+            Immutable tuple containing the registered plugin names.
+        """
+        return tuple(self._plugins)
+
+    def list_plugins(self) -> tuple[Plugin, ...]:
+        """
+        Return the registered plugin instances.
 
         Returns
         -------
         tuple[Plugin, ...]
-            An immutable snapshot of the currently registered plugins.
+            Immutable tuple containing plugin instances.
         """
         return tuple(self._plugins.values())
-
-    def list_plugins(self) -> Iterable[Plugin]:
-        """
-        Return all registered plugins.
-
-        This method is retained for backwards compatibility.
-        Prefer :meth:`list` for new code.
-        """
-        return self.list()
 
     def clear(self) -> None:
         """
@@ -107,9 +105,15 @@ class PluginRegistry:
         name: str,
     ) -> bool:
         """
-        Check whether a plugin is registered.
+        Return whether a plugin with the given name is registered.
         """
         return name in self._plugins
+
+    def __iter__(self) -> Iterable[Plugin]:
+        """
+        Iterate over registered plugin instances.
+        """
+        return iter(self._plugins.values())
 
     def __len__(self) -> int:
         """
